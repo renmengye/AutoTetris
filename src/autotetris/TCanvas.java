@@ -16,6 +16,7 @@ public class TCanvas extends Canvas implements ATCommon {
     private Board board;
     private GameStatus state;
     private Piece piece;
+    private int score;
 
     public TCanvas(Board board, Piece piece) {
         this.board = board;
@@ -35,10 +36,12 @@ public class TCanvas extends Canvas implements ATCommon {
         this.piece = piece;
     }
 
+    public void setScore(int score){
+        this.score = score;
+    }
+
     @Override
     public void paint(Graphics g) {
-        //System.out.println("hey");
-        //board.printBoard();
         byte[][] grid = board.getBoard();
         byte[][] pgrid = piece.getBoard().getBoard();
         for (int j = 0; j < YNUM; j++) {
@@ -48,6 +51,6 @@ public class TCanvas extends Canvas implements ATCommon {
                 }
             }
         }
-
+        g.drawString("SCORE: "+score, TWIDTH-80, GAP+10);
     }
 }

@@ -10,9 +10,9 @@ package autotetris;
  */
 public interface ATCommon {
 
-    public static final int WIDTH = 202, HEIGHT = 382,
+    public static final int TWIDTH = 202, THEIGHT = 382,
             GAP = 2, XNUM = 10, YNUM = 19,
-            XDIM = WIDTH / XNUM - GAP, YDIM = HEIGHT / YNUM - 2;
+            XDIM = TWIDTH / XNUM - GAP, YDIM = THEIGHT / YNUM - 2;
     //public static final int SHAPE_O=0,SHAPE_I=1,SHAPE_S=2,SHAPE_Z=3,SHAPE_J=4,SHAPE_L=5,SHAPE_T=6,SHAPE_NUM=7;
     public static final int[] O_NUM = {1, 2, 2, 2, 4, 4, 4};
     public static final byte[][] PROB = {{10, 15, 15, 15, 10, 10, 25},
@@ -72,4 +72,5 @@ public interface ATCommon {
                                             {0,0,1,0},
                                             {0,0,1,0},
                                             {0,0,1,0}};
+    public static final int[] SCORE={0,1,3,6,10};
 }

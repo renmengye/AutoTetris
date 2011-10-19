@@ -59,16 +59,43 @@ public class Board implements ATCommon {
         return sum;
     }
 
+    public int sum_line(int line) {
+        int r = 0;
+        for (int i = 0; i < XNUM; i++) {
+            r += board[line][i];
+        }
+        return r;
+    }
+
     //check if the current the piece can move or not
-    public boolean check_done(Piece piece, GameMove move){
+    public boolean check_done(Piece piece, GameMove move) {
         Piece test = piece.clone();
-        int mysum=sum();
+        int mysum = sum();
         int testsum = bindBoard(test.getBoard()).sum();
-        if(test.move(move)){
-            return (testsum>bindBoard(test.getBoard()).sum());
-        }else{
+        if (test.move(move)) {
+            return (testsum > bindBoard(test.getBoard()).sum());
+        } else {
             return true;
         }
+    }
+
+    public int checkFull() {
+        int fullcount = 0;
+        for (int j = 0; j < YNUM; j++) {
+            if (sum_line(j) == XNUM) {
+                fullcount++;
+                for (int k = j; k > 0; k--) {
+                    for (int m = 0; m < XNUM; m++) {
+                        board[k][m] = board[k - 1][m];
+                    }
+                }
+                for (int k = 0; k < XNUM; k++) {
+                    board[0][k] = 0;
+                }
+            }
+
+        }
+        return SCORE[fullcount];
     }
 
     //convert from byte to boolean, tool

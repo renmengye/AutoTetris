@@ -9,7 +9,7 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum Orientation {
+public enum Orientation implements ATCommon{
 
     CW0(0),CW90(1),CW180(2),CW270(3); //counterclockwise and the degree
     int num; //the order in the enumeration
@@ -35,17 +35,17 @@ public enum Orientation {
         return lookup.get(num);
     }
 
-    public static Orientation next(int num){
-        if(num>=3){
+    public static Orientation next(PieceType type,int num){
+        if(num>=O_NUM[type.value()]-1){
             return lookup.get(0);
         }else{
             return lookup.get(num+1);
         }
     }
 
-    public static Orientation prev(int num){
+    public static Orientation prev(PieceType type, int num){
         if(num<=0){
-            return lookup.get(3);
+            return lookup.get(O_NUM[type.value()]-1);
         }else{
             return lookup.get(num-1);
         }

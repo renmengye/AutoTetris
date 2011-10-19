@@ -65,18 +65,18 @@ public class Piece implements ATCommon {
     private boolean genBoard() {
         int dx, dy;
         byte[][] map = new byte[YNUM][XNUM];
-        try {
-            for (int i = 0; i <= 3; i++) {
-                dx = contour[i][CONTOUR_DX];
-                dy = contour[i][CONTOUR_DY];
-                //System.out.printf("x: %d, y: %d, dx: %d, dy: %d, shape: %d, ori: %d",x,y,dx,dy,shape,orient);
-                if (y + dy >= 0 && x + dx >= 0) {
-                    map[y + dy][x + dx] = 1;
-                }
+        //try {
+        for (int i = 0; i <= 3; i++) {
+            dx = contour[i][CONTOUR_DX];
+            dy = contour[i][CONTOUR_DY];
+            //System.out.printf("x: %d, y: %d, dx: %d, dy: %d, shape: %d, ori: %d",x,y,dx,dy,shape,orient);
+            if ((y + dy >= 0 && x + dx >= 0) && (y + dy < YNUM && x + dx < XNUM)) {
+                map[y + dy][x + dx] = 1;
             }
-        } catch (Exception e) {
-            return false;
         }
+        //} catch (Exception e) {
+        //  return false;
+        //}
         board.setBoard(map);
         return true;
     }
@@ -116,9 +116,9 @@ public class Piece implements ATCommon {
                 }
                 break;
             case CW:
-                Orientation new_orient = Orientation.next(orient.value());
+                Orientation new_orient = Orientation.next(type, orient.value());
                 byte[] new_range = RANGE[type.value()][new_orient.value()];
-                if (x < range[0] || x > range[1] || x < range[2] || x > range[3]) {
+                if (x < new_range[0] || x > new_range[1] || x < new_range[2] || x > new_range[3]) {
                     return false;
                 } else {
                     orient = new_orient;
@@ -128,7 +128,7 @@ public class Piece implements ATCommon {
                 genBoard();
                 break;
             case CCW:
-                Orientation new_orient2 = Orientation.prev(orient.value());
+                Orientation new_orient2 = Orientation.prev(type, orient.value());
                 byte[] new_range2 = RANGE[type.value()][new_orient2.value()];
                 if (x < range[0] || x > range[1] || x < range[2] || x > range[3]) {
                     return false;

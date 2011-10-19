@@ -26,13 +26,15 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         ResourceMap resourceMap = getResourceMap();
         JFrame mainFrame = getFrame();
         mainFrame.setTitle("Auto Tetris");
-        mainFrame.setSize(WIDTH, HEIGHT);
+        mainFrame.setSize(TWIDTH, THEIGHT);
         mainFrame.setLocation(200, 200);
         mainFrame.setResizable(false);
+        mainFrame.addKeyListener(this);
         menuBar.setVisible(false);
         board = new Board();
         random = new Random();
         move = GameMove.NULL;
+        score = 0;
         initPiece();
         tcanvas = new TCanvas(board, piece);
         new_round = true;
@@ -40,11 +42,15 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         performer = new ActionListener() { //Declare the methods for each timer action
 
             public void actionPerformed(ActionEvent e) {
-                piece.getBoard().printBoard();
                 if (board.check_done(piece, GameMove.DOWN)) { //if can't move, then goes to new round
                     if (!new_round) { //if it is not a new round, then generate new piece
                         new_round = true;
                         board.setBoard(board.bindBoard(piece.getBoard()).getBoard());
+                        int pscore = board.checkFull();
+                        if (pscore != 0) {
+                            score += pscore;
+                            tcanvas.setScore(score);
+                        }
                         initPiece();
                         tcanvas.setPiece(piece);
                     } else { //if it is new round, then dead
@@ -53,25 +59,12 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                         System.out.println("piece dead");
                     }
                 } else { //if we can still move the piece, then move
-                    if (move != GameMove.DROP) { //if not drop, move a grid
-                        piece.move(move);
-                        if (!board.check_done(piece, GameMove.DOWN)) { //if can still move down, move down
-                            piece.move(GameMove.DOWN);
-                        }
-                    } else {
-                        while (true) { //if drop, moving down until done
-                            if (!board.check_done(piece, GameMove.DOWN)) {
-                                piece.move(GameMove.DOWN);
-                            } else {
-                                break;
-                            }
-                        }
-                    }
+                    //if can still move down, move down
+                    piece.move(GameMove.DOWN);
                     new_round = false;
                 }
                 move = GameMove.NULL;
                 tcanvas.repaint();
-                System.out.println("aa");
             }
         };
         t = new Timer(500, performer);
@@ -79,9 +72,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     }
 
     public void keyPressed(KeyEvent e) {
-    }
-
-    public void keyTyped(KeyEvent e) {
+        move = GameMove.NULL;
         switch (e.getKeyCode()) {
             case KeyEvent.VK_LEFT:
                 move = GameMove.LEFT;
@@ -95,15 +86,36 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
             case KeyEvent.VK_SHIFT:
                 move = GameMove.CW;
                 break;
+            case KeyEvent.VK_UP:
+                move = GameMove.CW;
+                break;
             case KeyEvent.VK_ENTER:
                 move = GameMove.DROP;
                 break;
+            case KeyEvent.VK_SPACE:
+                if (t.isRunning()) {
+                    t.stop();
+                } else {
+                    t.restart();
+                }
+                break;
         }
-        /*if (e.getKeyCode() == KeyEvent.VK_LEFT) {
-        } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
-        } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
-        } else if (e.getKeyCode() == KeyEvent.VK_SHIFT) {
-        }*/
+        if (!board.check_done(piece, move)) {
+            if (move != GameMove.DROP) {
+                piece.move(move);
+                new_round = false;
+            } else {
+                while (!board.check_done(piece, GameMove.DOWN)) { //if drop, moving down until done
+                    piece.move(GameMove.DOWN);
+                    new_round = false;
+                }
+            }
+        }
+        move = GameMove.NULL;
+        tcanvas.repaint();
+    }
+
+    public void keyTyped(KeyEvent e) {
     }
 
     public void keyReleased(KeyEvent e) {
@@ -120,7 +132,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     }
 
     public void initCanvas() {
-        tcanvas.setSize(WIDTH, HEIGHT);
+        tcanvas.setSize(TWIDTH, THEIGHT);
         tcanvas.setBackground(Color.WHITE);
         mainPanel.add(tcanvas);
     }
@@ -199,4 +211,5 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     private boolean new_round; //store whether initiate a new piece
     private Random random;
     private ActionListener performer;
+    private int score;
 }
