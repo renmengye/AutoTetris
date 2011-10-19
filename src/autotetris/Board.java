@@ -18,19 +18,19 @@ public class Board implements ATCommon {
     }
 
     //manually set the board
-    protected void setBoard(byte[][] board) {
+    public void setBoard(byte[][] board) {
         this.board = board;
     }
 
     //return a matrix of grids
-    protected byte[][] getBoard() {
+    public byte[][] getBoard() {
         return board;
     }
 
     //output the matrix in the console for debugging, obsolete
-    protected void printBoard() {
-        for (int j = 0; j <= YNUM; j++) {
-            for (int i = 0; i <= XNUM; i++) {
+    public void printBoard() {
+        for (int j = 0; j < YNUM; j++) {
+            for (int i = 0; i < XNUM; i++) {
                 System.out.print(board[j][i]);
             }
             System.out.println();
@@ -38,19 +38,21 @@ public class Board implements ATCommon {
     }
 
     //input another board, binding the two boards and update into the matrix
-    protected void bindBoard(Board tobind) {
-        for (int j = 0; j <= YNUM; j++) {
-            for (int i = 0; i <= XNUM; i++) {
-                board[j][i] = bool2byte(byte2bool(board[j][i]) || byte2bool(tobind.getBoard()[j][i]));
+    public Board bindBoard(Board tobind) {
+        Board result = new Board();
+        for (int j = 0; j < YNUM; j++) {
+            for (int i = 0; i < XNUM; i++) {
+                result.getBoard()[j][i] = bool2byte(byte2bool(board[j][i]) || byte2bool(tobind.getBoard()[j][i]));
             }
         }
+        return result;
     }
 
     //calculate the sum of the board, special value
-    protected int sum() {
+    public int sum() {
         int sum = 0;
-        for (int j = 0; j <= YNUM; j++) {
-            for (int i = 0; i <= XNUM; i++) {
+        for (int j = 0; j < YNUM; j++) {
+            for (int i = 0; i < XNUM; i++) {
                 sum += board[j][i];
             }
         }
@@ -58,8 +60,15 @@ public class Board implements ATCommon {
     }
 
     //check if the current the piece can move or not
-    protected boolean check_done(Piece piece){
-        return true;
+    public boolean check_done(Piece piece, GameMove move){
+        Piece test = piece.clone();
+        int mysum=sum();
+        int testsum = bindBoard(test.getBoard()).sum();
+        if(test.move(move)){
+            return (testsum>bindBoard(test.getBoard()).sum());
+        }else{
+            return true;
+        }
     }
 
     //convert from byte to boolean, tool

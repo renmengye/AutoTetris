@@ -34,4 +34,20 @@ public enum Orientation {
     public static Orientation get(int num) {
         return lookup.get(num);
     }
+
+    public static Orientation next(int num){
+        if(num>=3){
+            return lookup.get(0);
+        }else{
+            return lookup.get(num+1);
+        }
+    }
+
+    public static Orientation prev(int num){
+        if(num<=0){
+            return lookup.get(3);
+        }else{
+            return lookup.get(num-1);
+        }
+    }
 }

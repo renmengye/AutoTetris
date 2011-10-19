@@ -31,28 +31,50 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         mainFrame.setResizable(false);
         menuBar.setVisible(false);
         board = new Board();
-        tcanvas = new TCanvas(board);
-        new_round = true;
         random = new Random();
+        move = GameMove.NULL;
+        initPiece();
+        tcanvas = new TCanvas(board, piece);
+        new_round = true;
         initCanvas();
-        performer = new ActionListener() {
+        performer = new ActionListener() { //Declare the methods for each timer action
+
             public void actionPerformed(ActionEvent e) {
-                if (new_round) {
-                    int type = random.nextInt(7);
-                    int orient = random.nextInt(O_NUM[type]);
-                    piece = new Piece(PieceType.get(type), Orientation.get(orient));
-                    if (board.check_done(piece)) {
+                piece.getBoard().printBoard();
+                if (board.check_done(piece, GameMove.DOWN)) { //if can't move, then goes to new round
+                    if (!new_round) { //if it is not a new round, then generate new piece
+                        new_round = true;
+                        board.setBoard(board.bindBoard(piece.getBoard()).getBoard());
+                        initPiece();
+                        tcanvas.setPiece(piece);
+                    } else { //if it is new round, then dead
                         tcanvas.setStatus(GameStatus.DEAD);
                         t.stop();
+                        System.out.println("piece dead");
                     }
-                } else if (board.check_done(piece)) {
-                    new_round=true;
-                    board.bindBoard(piece.getBoard());
+                } else { //if we can still move the piece, then move
+                    if (move != GameMove.DROP) { //if not drop, move a grid
+                        piece.move(move);
+                        if (!board.check_done(piece, GameMove.DOWN)) { //if can still move down, move down
+                            piece.move(GameMove.DOWN);
+                        }
+                    } else {
+                        while (true) { //if drop, moving down until done
+                            if (!board.check_done(piece, GameMove.DOWN)) {
+                                piece.move(GameMove.DOWN);
+                            } else {
+                                break;
+                            }
+                        }
+                    }
+                    new_round = false;
                 }
-
+                move = GameMove.NULL;
+                tcanvas.repaint();
+                System.out.println("aa");
             }
         };
-        t = new Timer(100, performer);
+        t = new Timer(500, performer);
         t.start();
     }
 
@@ -101,6 +123,12 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         tcanvas.setSize(WIDTH, HEIGHT);
         tcanvas.setBackground(Color.WHITE);
         mainPanel.add(tcanvas);
+    }
+
+    public void initPiece() {
+        int type = random.nextInt(7); //generate random piece type
+        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
+        piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
     }
 
     /** This method is called from within the constructor to
@@ -164,11 +192,11 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     // End of variables declaration//GEN-END:variables
     private JDialog aboutBox;
     private TCanvas tcanvas;
-    private Board board;
+    private Board board; //store current fixed grid
     private Timer t;
-    private GameMove move;
-    private Piece piece;
-    private boolean new_round;
+    private GameMove move; //store the keyboard action for the piece
+    private Piece piece; //store a current moving piece
+    private boolean new_round; //store whether initiate a new piece
     private Random random;
     private ActionListener performer;
 }
