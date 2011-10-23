@@ -31,6 +31,10 @@ public class TCanvas extends Canvas implements ATCommon {
     public void setStatus(GameStatus state) {
         this.state = state;
     }
+    
+    public GameStatus getStatus(){
+        return state;
+    }
 
     public void setPiece(Piece piece) {
         this.piece = piece;

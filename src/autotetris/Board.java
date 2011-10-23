@@ -70,12 +70,12 @@ public class Board implements ATCommon {
     //check if the current the piece can move or not
     public boolean check_done(Piece piece, GameMove move) {
         Piece test = piece.clone();
-        int mysum = sum();
-        int testsum = bindBoard(test.getBoard()).sum();
-        if (test.move(move)) {
-            return (testsum > bindBoard(test.getBoard()).sum());
+        int mysum = sum(); //the board sum
+        int piecesum = test.getBoard().sum(); //the piece sum
+        if (test.move(move)) { //if move is not out of bound
+            return (bindBoard(test.getBoard()).sum() < mysum + piecesum); //if sum equals after bind then not done, otherwise done
         } else {
-            return true;
+            return true; //if out of bound then done
         }
     }
 
@@ -106,5 +106,10 @@ public class Board implements ATCommon {
     //conver from boolean to byte, tool
     public static byte bool2byte(boolean x) {
         return x ? (byte) 1 : (byte) 0;
+    }
+
+    @Override
+    public Board clone() {
+        return new Board(board);
     }
 }

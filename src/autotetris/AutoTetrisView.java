@@ -37,82 +37,139 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         score = 0;
         initPiece();
         tcanvas = new TCanvas(board, piece);
-        new_round = true;
+        automode = false;
+        player = new Player();
         initCanvas();
         performer = new ActionListener() { //Declare the methods for each timer action
 
             public void actionPerformed(ActionEvent e) {
-                if (board.check_done(piece, GameMove.DOWN)) { //if can't move, then goes to new round
-                    if (!new_round) { //if it is not a new round, then generate new piece
-                        new_round = true;
-                        board.setBoard(board.bindBoard(piece.getBoard()).getBoard());
-                        int pscore = board.checkFull();
-                        if (pscore != 0) {
-                            score += pscore;
-                            tcanvas.setScore(score);
-                        }
-                        initPiece();
-                        tcanvas.setPiece(piece);
-                    } else { //if it is new round, then dead
-                        tcanvas.setStatus(GameStatus.DEAD);
-                        t.stop();
-                        System.out.println("piece dead");
-                    }
-                } else { //if we can still move the piece, then move
-                    //if can still move down, move down
-                    piece.move(GameMove.DOWN);
-                    new_round = false;
-                }
-                move = GameMove.NULL;
-                tcanvas.repaint();
+                action();
             }
         };
         t = new Timer(500, performer);
         t.start();
     }
 
-    public void keyPressed(KeyEvent e) {
-        move = GameMove.NULL;
-        switch (e.getKeyCode()) {
-            case KeyEvent.VK_LEFT:
-                move = GameMove.LEFT;
-                break;
-            case KeyEvent.VK_RIGHT:
-                move = GameMove.RIGHT;
-                break;
-            case KeyEvent.VK_DOWN:
-                move = GameMove.DROP;
-                break;
-            case KeyEvent.VK_SHIFT:
-                move = GameMove.CW;
-                break;
-            case KeyEvent.VK_UP:
-                move = GameMove.CW;
-                break;
-            case KeyEvent.VK_ENTER:
-                move = GameMove.DROP;
-                break;
-            case KeyEvent.VK_SPACE:
-                if (t.isRunning()) {
-                    t.stop();
-                } else {
-                    t.restart();
-                }
-                break;
-        }
-        if (!board.check_done(piece, move)) {
-            if (move != GameMove.DROP) {
-                piece.move(move);
-                new_round = false;
-            } else {
-                while (!board.check_done(piece, GameMove.DOWN)) { //if drop, moving down until done
-                    piece.move(GameMove.DOWN);
-                    new_round = false;
-                }
+    public void action() {
+        if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
+            board.setBoard(board.bindBoard(piece.getBoard()).getBoard()); //the piece become history
+            int pscore = board.checkFull(); //check if there is any score gained
+            if (pscore != 0) { //if there is score
+                score += pscore; //then add score
+                tcanvas.setScore(score);
+            }
+            initPiece(); //initialize a new piece
+            tcanvas.setPiece(piece);
+            if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                tcanvas.setStatus(GameStatus.DEAD);
+                t.stop();
+                System.out.println("piece dead");
+            }
+            if (automode) { //if it is automode then generate moves
+                player.genMoves(board, piece);
+            }
+        } else {
+            if (automode) { //if automode then execute next move
+                piece.move(player.getMove(piece));
+            }
+            if (board.check_done(piece, GameMove.DOWN)) { //move down as usual
+                piece.move(GameMove.DOWN);
             }
         }
         move = GameMove.NULL;
         tcanvas.repaint();
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (!automode) { //if not automode
+            switch (tcanvas.getStatus()) {
+                case PLAY: {
+                    move = GameMove.NULL;
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_LEFT:
+                            move = GameMove.LEFT;
+                            break;
+                        case KeyEvent.VK_RIGHT:
+                            move = GameMove.RIGHT;
+                            break;
+                        case KeyEvent.VK_DOWN:
+                            move = GameMove.DROP;
+                            break;
+                        case KeyEvent.VK_SHIFT:
+                            move = GameMove.CW;
+                            break;
+                        case KeyEvent.VK_UP:
+                            move = GameMove.CW;
+                            break;
+                        case KeyEvent.VK_ENTER:
+                            random = new Random();
+                            score = 0;
+                            initPiece();
+                            board = new Board();
+                            tcanvas.setBoard(board);
+                            tcanvas.setPiece(piece);
+                            break;
+                        case KeyEvent.VK_SPACE:
+                            if (t.isRunning()) {
+                                t.stop();
+                            } else {
+                                t.restart();
+                            }
+                            break;
+                        case KeyEvent.VK_9:
+                            automode = !automode;
+                            break;
+                    }
+                    if (!board.check_done(piece, move)) {
+                        if (move != GameMove.DROP) {
+                            piece.move(move);
+                            //new_round = false;
+                        } else {
+                            while (!board.check_done(piece, GameMove.DOWN)) { //if drop, moving down until done
+                                piece.move(GameMove.DOWN);
+                                // System.out.println("board");
+                                //board.printBoard();
+                                //System.out.println("piece");
+                                //piece.getBoard().printBoard();
+                            }
+                        }
+                    }
+                    break;
+                }
+                case DEAD: {
+                    switch (e.getKeyCode()) {
+                        case KeyEvent.VK_ENTER:
+                            random = new Random();
+                            score = 0;
+                            initPiece();
+                            board = new Board();
+                            tcanvas.setBoard(board);
+                            tcanvas.setPiece(piece);
+                            t.start();
+                            break;
+                    }
+                }
+            }
+            move = GameMove.NULL;
+            tcanvas.repaint();
+        } else {
+            switch (e.getKeyCode()) {
+                case KeyEvent.VK_9:
+                    automode = !automode;
+                    break;
+                case KeyEvent.VK_ENTER:
+                    random = new Random();
+                    score = 0;
+                    initPiece();
+                    board = new Board();
+                    tcanvas.setBoard(board);
+                    tcanvas.setPiece(piece);
+                    if (tcanvas.getStatus() == GameStatus.DEAD) {
+                        t.start();
+                    }
+                    break;
+            }
+        }
     }
 
     public void keyTyped(KeyEvent e) {
@@ -131,13 +188,13 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         //AutoTetrisApp.getApplication().show(aboutBox);
     }
 
-    public void initCanvas() {
+    public final void initCanvas() {
         tcanvas.setSize(TWIDTH, THEIGHT);
         tcanvas.setBackground(Color.WHITE);
         mainPanel.add(tcanvas);
     }
 
-    public void initPiece() {
+    public final void initPiece() {
         int type = random.nextInt(7); //generate random piece type
         int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
         piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
@@ -208,8 +265,9 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     private Timer t;
     private GameMove move; //store the keyboard action for the piece
     private Piece piece; //store a current moving piece
-    private boolean new_round; //store whether initiate a new piece
     private Random random;
     private ActionListener performer;
     private int score;
+    private boolean automode; //if it is AI's show
+    private Player player; //computer AI agent
 }
