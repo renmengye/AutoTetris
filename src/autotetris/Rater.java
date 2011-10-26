@@ -9,15 +9,8 @@ package autotetris;
  * @author rmy
  */
 public class Rater {
-    
-    /*private Board board;
-    
-    public Rater(Board board){
-        this.board=board;
-    }*/
-    
     public static int rate(Board board){
-        return 0;
+        return board.checkFull()+10;
     }
     
     

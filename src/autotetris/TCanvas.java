@@ -46,6 +46,7 @@ public class TCanvas extends Canvas implements ATCommon {
 
     @Override
     public void paint(Graphics g) {
+        g.drawRect(1, 1, TWIDTH-2, THEIGHT-2);
         byte[][] grid = board.getBoard();
         byte[][] pgrid = piece.getBoard().getBoard();
         for (int j = 0; j < YNUM; j++) {

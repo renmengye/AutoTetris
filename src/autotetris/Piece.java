@@ -20,7 +20,8 @@ public class Piece implements ATCommon {
         this.range = RANGE[type.value()][orient.value()];
         this.contour = CONTOUR[type.value()][orient.value()];
         this.x = XNUM / 2;
-        this.y = START_Y[type.value()][orient.value()];
+        this.y = range[2];
+        //this.y = START_Y[type.value()][orient.value()];
         this.board = new Board();
         genBoard();
     }
@@ -89,7 +90,7 @@ public class Piece implements ATCommon {
     }
 
     //move the piece by input a GameMove object
-    public boolean move(GameMove move) {
+    public boolean move(GameMove move, Board board) {
         switch (move) {
             case LEFT:
                 if (x - 1 < range[0]) {
@@ -112,6 +113,14 @@ public class Piece implements ATCommon {
                     return false;
                 } else {
                     y++;
+                    genBoard();
+                }
+                break;
+            case UP:
+                if (y - 1 < range[2]) {
+                    return false;
+                } else {
+                    y--;
                     genBoard();
                 }
                 break;
@@ -140,6 +149,13 @@ public class Piece implements ATCommon {
                 genBoard();
                 break;
             case DROP:
+                if (board.check_done(this, GameMove.DOWN)) {
+                    return false;
+                } else {
+                    do { //if drop, moving down until done
+                        this.move(GameMove.DOWN, board);
+                    } while (!board.check_done(this, GameMove.DOWN));
+                }
                 break;
             case NULL:
                 break;
@@ -148,11 +164,29 @@ public class Piece implements ATCommon {
     }
 
     //move the pirce by a series of GameMove
-    public boolean moves(GameMove[] moves) {
+    public boolean moves(GameMove[] moves, Board board) {
         for (GameMove move : moves) {
-            if (!move(move)) {
+            if (!move(move, board)) {
                 return false;
             }
+        }
+        return true;
+    }
+
+    public boolean revmove(GameMove move, Board board) {
+        switch (move) {
+            case LEFT:
+                return move(GameMove.RIGHT,board);
+            case RIGHT:
+                return move(GameMove.LEFT,board);
+            case DOWN:
+                return move(GameMove.UP,board);
+            case CW:
+                return move(GameMove.CCW,board);
+            case CCW:
+                return move(GameMove.CW,board);
+            case NULL:
+                break;
         }
         return true;
     }

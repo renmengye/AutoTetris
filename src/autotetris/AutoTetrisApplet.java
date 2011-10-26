@@ -1,36 +1,44 @@
 /*
- * Author: Mengye Ren
- * Application's main frame, control centre
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
  */
 package autotetris;
 
 import java.awt.Color;
-import org.jdesktop.application.Action;
-import org.jdesktop.application.ResourceMap;
-import org.jdesktop.application.SingleFrameApplication;
-import org.jdesktop.application.FrameView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.Random;
 import javax.swing.Timer;
-import javax.swing.JDialog;
-import javax.swing.JFrame;
+import javax.swing.JApplet;
 
-public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
+/**
+ *
+ * @author rmy
+ */
+public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, MouseListener {
 
-    public AutoTetrisView(SingleFrameApplication app) {
-        super(app);
-        initComponents();
-        ResourceMap resourceMap = getResourceMap();
-        JFrame mainFrame = getFrame();
-        mainFrame.setTitle("Auto Tetris");
-        mainFrame.setSize(TWIDTH, THEIGHT);
-        mainFrame.setLocation(200, 200);
-        mainFrame.setResizable(false);
-        mainFrame.addKeyListener(this);
-        menuBar.setVisible(false);
+    /**
+     * Initialization method that will be called after the applet is loaded
+     * into the browser.
+     */
+    private TCanvas tcanvas;
+    private Board board; //store current fixed grid
+    private Timer t;
+    private GameMove move; //store the keyboard action for the piece
+    private Piece piece; //store a current moving piece
+    private Random random;
+    private ActionListener performer;
+    private int score;
+    private boolean automode; //if it is AI's show
+    private Player player; //computer AI agent
+    
+    @Override
+    public void init() {
+        // TODO start asynchronous download of heavy resources
         board = new Board();
         random = new Random();
         move = GameMove.NULL;
@@ -51,8 +59,27 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         };
         t = new Timer(500, performer);
         t.start();
+        setFocusable(true);
+        requestFocus();
+        addKeyListener(this);
+        addMouseListener(this);
     }
-
+    
+    public final Piece initPiece() {
+        int type = random.nextInt(7); //generate random piece type
+        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
+        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
+        return new_piece;
+    }
+    
+    public final void initCanvas() {
+        tcanvas.setSize(TWIDTH, THEIGHT);
+        tcanvas.setBackground(Color.WHITE);
+        tcanvas.setStatus(GameStatus.PLAY);
+        this.add(tcanvas);
+    }
+    // TODO overwrite start(), stop() and destroy() methods
+    
     public void action() {
         //System.out.println(automode);
         //System.out.println(board.check_done(piece, GameMove.DOWN));
@@ -89,7 +116,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         move = GameMove.NULL;
         tcanvas.repaint();
     }
-
+    
     public void keyPressed(KeyEvent e) {
         if (!automode) { //if not automode
             switch (tcanvas.getStatus()) {
@@ -171,6 +198,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                     break;
             }
         }
+        e.consume();
     }
 
     public void keyTyped(KeyEvent e) {
@@ -178,99 +206,13 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
 
     public void keyReleased(KeyEvent e) {
     }
-
-    @Action
-    public void showAboutBox() {
-        if (aboutBox == null) {
-            JFrame mainFrame = AutoTetrisApp.getApplication().getMainFrame();
-            aboutBox = new AutoTetrisAboutBox(mainFrame);
-            aboutBox.setLocationRelativeTo(mainFrame);
-        }
-        //AutoTetrisApp.getApplication().show(aboutBox);
-    }
-
-    public final void initCanvas() {
-        tcanvas.setSize(TWIDTH, THEIGHT);
-        tcanvas.setBackground(Color.WHITE);
-        tcanvas.setStatus(GameStatus.PLAY);
-        mainPanel.add(tcanvas);
-    }
-
-    public final Piece initPiece() {
-        int type = random.nextInt(7); //generate random piece type
-        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
-        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
-        return new_piece;
-    }
-
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
-     */
-    @SuppressWarnings("unchecked")
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
-
-        mainPanel = new javax.swing.JPanel();
-        menuBar = new javax.swing.JMenuBar();
-        javax.swing.JMenu fileMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem exitMenuItem = new javax.swing.JMenuItem();
-        javax.swing.JMenu helpMenu = new javax.swing.JMenu();
-        javax.swing.JMenuItem aboutMenuItem = new javax.swing.JMenuItem();
-
-        mainPanel.setName("mainPanel"); // NOI18N
-        mainPanel.setPreferredSize(new java.awt.Dimension(202, 382));
-
-        org.jdesktop.layout.GroupLayout mainPanelLayout = new org.jdesktop.layout.GroupLayout(mainPanel);
-        mainPanel.setLayout(mainPanelLayout);
-        mainPanelLayout.setHorizontalGroup(
-            mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 307, Short.MAX_VALUE)
-        );
-        mainPanelLayout.setVerticalGroup(
-            mainPanelLayout.createParallelGroup(org.jdesktop.layout.GroupLayout.LEADING)
-            .add(0, 391, Short.MAX_VALUE)
-        );
-
-        menuBar.setName("menuBar"); // NOI18N
-
-        org.jdesktop.application.ResourceMap resourceMap = org.jdesktop.application.Application.getInstance(autotetris.AutoTetrisApp.class).getContext().getResourceMap(AutoTetrisView.class);
-        fileMenu.setText(resourceMap.getString("fileMenu.text")); // NOI18N
-        fileMenu.setName("fileMenu"); // NOI18N
-
-        javax.swing.ActionMap actionMap = org.jdesktop.application.Application.getInstance(autotetris.AutoTetrisApp.class).getContext().getActionMap(AutoTetrisView.class, this);
-        exitMenuItem.setAction(actionMap.get("quit")); // NOI18N
-        exitMenuItem.setName("exitMenuItem"); // NOI18N
-        fileMenu.add(exitMenuItem);
-
-        menuBar.add(fileMenu);
-
-        helpMenu.setText(resourceMap.getString("helpMenu.text")); // NOI18N
-        helpMenu.setName("helpMenu"); // NOI18N
-
-        aboutMenuItem.setAction(actionMap.get("showAboutBox")); // NOI18N
-        aboutMenuItem.setName("aboutMenuItem"); // NOI18N
-        helpMenu.add(aboutMenuItem);
-
-        menuBar.add(helpMenu);
-
-        setComponent(mainPanel);
-        setMenuBar(menuBar);
-    }// </editor-fold>//GEN-END:initComponents
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JPanel mainPanel;
-    private javax.swing.JMenuBar menuBar;
-    // End of variables declaration//GEN-END:variables
-    private JDialog aboutBox;
-    private TCanvas tcanvas;
-    private Board board; //store current fixed grid
-    private Timer t;
-    private GameMove move; //store the keyboard action for the piece
-    private Piece piece; //store a current moving piece
-    private Random random;
-    private ActionListener performer;
-    private int score;
-    private boolean automode; //if it is AI's show
-    private Player player; //computer AI agent
+    
+    public void mouseEntered( MouseEvent e ) { }
+   public void mouseExited( MouseEvent e ) { }
+   public void mousePressed( MouseEvent e ) { }
+   public void mouseReleased( MouseEvent e ) { }
+   public void mouseClicked( MouseEvent e ) {
+       automode = !automode;
+       e.consume();
+   }
 }

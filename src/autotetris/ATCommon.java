@@ -24,13 +24,21 @@ public interface ATCommon {
                                         {15, 30, 15, 15, 5, 5, 15}};
     //public static final int CW0=0,CW90=1,CW180=2,CW270=3,CCW90=3,CCW180=2;
     //RANGE(SHAPE,ORIENTATION,RANGE)
-    public static final byte[][][] RANGE = {{{1, XNUM, 0, YNUM - 1}},
+    public static final byte[][][] RANGE2 = {{{1, XNUM, 0, YNUM - 1}},
                                             {{2, XNUM - 1, 0, YNUM}, {0, XNUM, 2, YNUM - 1}},
                                             {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}},
                                             {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}},
                                             {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}},
                                             {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}},
                                             {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}}};
+    
+    public static final byte[][][] RANGE = {{{1, XNUM-1, 0, YNUM - 2}},
+                                            {{2, XNUM - 2, 0, YNUM-1}, {0, XNUM-1, 2, YNUM - 2}},
+                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}},
+                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}},
+                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}},
+                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}},
+                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}}};
     public static final int RANGE_XLB = 0, RANGE_XUB = 1, RANGE_YLB = 2, RANGE_YUB = 3;
     public static final int CONTOUR_DX = 0, CONTOUR_DY = 1;
     //SHAPE_MAP(SHAPE,ORIENTATION,GRID,D)
