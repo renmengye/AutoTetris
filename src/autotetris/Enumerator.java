@@ -4,6 +4,8 @@
  */
 package autotetris;
 
+import java.util.ArrayList;
+
 /**
  *
  * @author rmy
@@ -12,48 +14,46 @@ public class Enumerator implements ATCommon {
 
     private Board board;
     private Piece piece;
-    protected Piece next_piece;
+    protected ArrayList<Piece> candidates;
 
     public Enumerator(Board board, Piece piece) {
         this.board = board;
         this.piece = piece;
-        next_piece = new Piece(piece.getType(), piece.getOrient(), piece.range[0]-1, piece.range[3]);
+        this.candidates = new ArrayList<Piece>();
     }
 
-    /*public void setBoard(Board board){
-    this.board=board;
-    }*/
-    public boolean next() {
-        //enumerater.next is not responsible of making rotations
+    public void enumerate() {
         boolean found = false;
-        Piece test_piece = next_piece.clone();
-        outer:
-        for (int j = next_piece.getY(); j >= piece.range[2]; j--) { //search from bottom
-            test_piece.setXY(0, j);
-            for (int i = 0; i <= piece.range[1]; i++) { //search from left
-                test_piece.setXY(i, j);
-                if (j != next_piece.getY()||i > next_piece.getX()) { //if not the previous one
-                    //System.out.printf("checking x: %d, y: %d\n",i,j);
-                    if (!occupy_check(i, j)) { //if the position is not occupied
-                        //System.out.println("passing occupy test");
+        Piece test_piece;
+        for (int j = YNUM - 1; j >= 0; j--) { //search from bottom
+            for (int i = 0; i < XNUM; i++) {
+                for (int h = 0; h < O_NUM[piece.getType().value()]; h++) {
+                    test_piece = new Piece(piece.getType(), Orientation.get(h), i, j); //generate a new test piece
+                    if (test_piece.check_range(i, j)&&!occupy_check(test_piece,i, j)) { //if the position is not occupied and inside the range
                         if (board.check_done(test_piece, GameMove.DOWN)) { //if the position is final
-                            //System.out.println("passing done test");
-                            found = true; //break the loop, notify player that the next is found
-                            next_piece=test_piece;
-                            break outer;
+                            candidates.add(test_piece);
                         }
                     }
                 }
             }
         }
-        return found;
     }
 
-    private boolean occupy_check(int x, int y) {
+    public Piece next() {
+        if (candidates.size() > 0) {
+            Piece next = (Piece) candidates.get(0);
+            candidates.remove(0);
+            return next;
+        } else {
+            return null;
+        }
+    }
+
+    private boolean occupy_check(Piece piece, int x, int y) {
         for (int k = 0; k <= 3; k++) {
             int dx = piece.contour[k][0];
             int dy = piece.contour[k][1];
-            if ((y + dy >= 0 && x + dx >= 0) && (y + dy < YNUM && x + dx < XNUM)){
+            if ((y + dy >= 0 && x + dx >= 0) && (y + dy < YNUM && x + dx < XNUM)) {
                 if (board.getBoard()[y + dy][x + dx] == 1) {
                     return true;
                 }

@@ -32,16 +32,18 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         mainFrame.addKeyListener(this);
         menuBar.setVisible(false);
         board = new Board();
-        random = new Random();
+        random = new Random(1234);
         move = GameMove.NULL;
         score = 0;
-        piece=initPiece();
+        piece = initPiece();
         tcanvas = new TCanvas(board, piece);
         automode = true;
         player = new Player();
-        if(automode){
-            player.genMoves(board,piece);
+        //board.printBoard();
+        if (automode) {
+            player.genMoves(board, piece);
         }
+        //board.printBoard();
         initCanvas();
         performer = new ActionListener() { //Declare the methods for each timer action
 
@@ -49,16 +51,15 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                 action();
             }
         };
-        t = new Timer(500, performer);
+        t = new Timer(100, performer);
         t.start();
     }
 
     public void action() {
-        //System.out.println(automode);
-        //System.out.println(board.check_done(piece, GameMove.DOWN));
+        //System.out.println("major board checking");
+        //board.printBoard();
         if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
-            //System.out.println("it's done");
-            board.setBoard(board.bindBoard(piece.getBoard()).getBoard()); //the piece become history
+            board.bindPiece(piece); //the piece become history
             int pscore = board.checkFull(); //check if there is any score gained
             if (pscore != 0) { //if there is score
                 score += pscore; //then add score
@@ -109,15 +110,16 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                             move = GameMove.CW;
                             break;
                         case KeyEvent.VK_UP:
-                            move = GameMove.CCW;
+                            move = GameMove.CW;
                             break;
                         case KeyEvent.VK_ENTER:
-                            random = new Random();
+                            random = new Random(1234);
                             score = 0;
                             initPiece();
                             board = new Board();
                             tcanvas.setBoard(board);
                             tcanvas.setPiece(piece);
+                            tcanvas.setScore(score);
                             break;
                         case KeyEvent.VK_SPACE:
                             if (t.isRunning()) {
@@ -132,20 +134,21 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                             player.genMoves(board, piece);
                             break;
                     }
-                    if (!board.check_done(piece, move)) {
-                        piece.move(move, board);
-                    }
+                    //if (!board.check_done(piece, move)) {
+                    piece.move(move, board);
+                    //}
                     break;
                 }
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            random = new Random();
+                            random = new Random(1234);
                             score = 0;
                             initPiece();
                             board = new Board();
                             tcanvas.setBoard(board);
                             tcanvas.setPiece(piece);
+                            tcanvas.setScore(score);
                             t.start();
                             break;
                     }
@@ -165,6 +168,8 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                     board = new Board();
                     tcanvas.setBoard(board);
                     tcanvas.setPiece(piece);
+                    tcanvas.setScore(score);
+                    player.genMoves(board, piece);
                     if (tcanvas.getStatus() == GameStatus.DEAD) {
                         t.start();
                     }

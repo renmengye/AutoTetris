@@ -21,55 +21,10 @@ public class Router {
         this.target = target;
     }
 
-    public ArrayList<GameMove> route_old(Piece piece, Piece target, ArrayList<GameMove> moves) {
-        System.out.printf("x:%d y:%d\n", piece.getX(), piece.getY());
-        for (int i = 0; i < moves.size(); i++) {
-            System.out.printf("%s x:%d y:%d\n", moves.get(i), piece.getX(), piece.getY());
-        }
-        System.out.println();
-        if (piece.getX() == target.getX() && piece.getY() == target.getY() && piece.getOrient() == target.getOrient()) {
-            return moves;
-        } else {
-            GameMove move;
-            for (int i = 1; i <= 5; i++) {
-                move = GameMove.get(i);
-                if (move == GameMove.RIGHT) {
-                    if (target.getX() >= piece.getX()) {
-                        continue;
-                    }
-                } else if (move == GameMove.LEFT) {
-                    if (target.getX() <= piece.getX()) {
-                        continue;
-                    }
-                } else if (move == GameMove.CW || move == GameMove.CCW) {
-                    if (target.getOrient() == piece.getOrient()) {
-                        continue;
-                    }
-                }
-                Piece test = piece.clone();
-                if (test.revmove(move, board)) {
-                    if (move != GameMove.DOWN && !test.revmove(GameMove.DOWN, board)) {
-                        continue;
-                    } else {
-                        moves.add(move);
-                        ArrayList<GameMove> tmoves = route_old(test, target, moves); //recursion
-                        if (tmoves != null) {
-                            return tmoves;
-                        } else {
-                            moves.remove(moves.size() - 1);
-                        }
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
     //another routing approach
     public ArrayList<GameMove> route(Piece piece, ArrayList<GameMove> moves, boolean dropped) {
-        //System.out.printf("tx:%d ty:%d to:%d x:%d y:%d o:%d\n", target.getX(), target.getY(), target.getOrient().value(), piece.getX(), piece.getY(), piece.getOrient().value());
+
         if (piece.getX() == target.getX() && piece.getY() == target.getY() && piece.getOrient() == target.getOrient()) {
-            //System.out.println("RETURNED!!");
             return moves;
         }
         if (target.getY() < piece.getY()) {
@@ -80,23 +35,25 @@ public class Router {
 
             //if the piece have not yet go through the reverse dropping test, then do it now
             if (!dropped) {
-                for (int j = piece.getY() - target.getY() - Math.abs(dx) - Math.abs(dr) - 1; j >= 0; j--) { //repeat from the max drop to the min drop
+                for (int j = piece.getY() - target.getY() - Math.abs(dx) - Math.abs(dr) - 1; j >= 2; j--) { //repeat from the max drop to the min drop
                     Piece test = piece.clone();
                     boolean possible_drop = true;
                     for (int i = 0; i <= j; i++) {
+                        if (!board.check_done(test, GameMove.UP)) {
                         if (!test.revmove(GameMove.DOWN, board)) {
                             possible_drop = false; //break the loop and indicate that the drop is impossible.
                             break;
                         }
+                        }
                     }
                     if (possible_drop) { //if the drop is possible
                         moves.add(0, GameMove.DROP);
-                        ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                        if (tmoves != null) {
-                            return tmoves;
-                        } else {
-                            moves.remove(0);
-                        }
+                    }
+                    ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
+                    if (tmoves != null) {
+                        return tmoves;
+                    } else {
+                        moves.remove(0);
                     }
                 }
             } else { //if the object is already dropped, then search horizontally and rotationally (only one)
@@ -106,18 +63,19 @@ public class Router {
                         continue;
                     } else if (move == GameMove.RIGHT && dx > 0) {
                         continue;
-                    } else if (dr==0&&(move == GameMove.CW||move == GameMove.CW)){
+                    } else if (dr == 0 && (move == GameMove.CW || move == GameMove.CW)) {
                         continue;
                     } else { // now start search
-                        //System.out.println(move);
                         Piece test = piece.clone();
-                        if (test.revmove(GameMove.DOWN, board) && test.revmove(move, board)) { //if it is a possible move
-                            moves.add(0, move);
-                            ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                            if (tmoves != null) {
-                                return tmoves;
-                            } else {
-                                moves.remove(0);
+                        if (!board.check_done(test, GameMove.UP)&&!board.check_done(test, GameMove.reverse(move))) {
+                            if (test.revmove(GameMove.DOWN, board) && test.revmove(move, board)) { //if it is a possible move
+                                moves.add(0, move);
+                                ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
+                                if (tmoves != null) {
+                                    return tmoves;
+                                } else {
+                                    moves.remove(0);
+                                }
                             }
                         }
                     }

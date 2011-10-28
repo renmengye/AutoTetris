@@ -48,14 +48,26 @@ public class TCanvas extends Canvas implements ATCommon {
     public void paint(Graphics g) {
         g.drawRect(1, 1, TWIDTH-2, THEIGHT-2);
         byte[][] grid = board.getBoard();
-        byte[][] pgrid = piece.getBoard().getBoard();
+        //byte[][] pgrid = piece.getBoard().getBoard();
+        
+        //draw the board
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                if (grid[j][i] == 1 || pgrid[j][i] == 1) {
+                //if (grid[j][i] == 1 || pgrid[j][i] == 1) {
+                if (grid[j][i] == 1) {
                     g.fillRect(i * (XDIM + GAP) + GAP, j * (YDIM + GAP) + GAP, XDIM, YDIM);
                 }
             }
         }
+        
+        //draw the piece
+        for (int i=0;i<=3;i++){
+            int x=piece.getX()+piece.getContour(i, CONTOUR_DX);
+            int y=piece.getY()+piece.getContour(i,CONTOUR_DY);
+            g.fillRect(x * (XDIM + GAP) + GAP, y * (YDIM + GAP) + GAP, XDIM, YDIM);
+        }
+        
+        //draw the score
         g.drawString("SCORE: "+score, TWIDTH-80, GAP+10);
     }
 }

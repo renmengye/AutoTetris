@@ -7,7 +7,7 @@ import java.util.ArrayList;
 
 /**
  *
- * @author MengYe
+ * @author rmy
  */
 public class Player implements ATCommon {
 
@@ -15,61 +15,61 @@ public class Player implements ATCommon {
     private Piece piece;
     private Enumerator enumerator; //first enumerate
     private Router router; // then check if it is possible to form a route
-    //private Rater rater; //lastly give a rating for the circumstance
+    private Rater rater; //lastly give a rating for the circumstance
     //private GameMove[] moves;
     private ArrayList<GameMove> moves;
     private static int movecount;
 
     public Player() {
+        rater = new Rater();
     }
 
     public ArrayList<GameMove> genMoves(Board board, Piece piece) {
         this.board = board;
         this.piece = piece;
         moves = null;
-        int max = 0;
+        int max = -1000;
         Piece test = piece.clone();
-        for (int h = 0; h < O_NUM[piece.getType().value()]; h++) { //first have an orientation
-            System.out.printf("make turn %d\n",h);
-            enumerator = new Enumerator(board, test); //initialize the enumerator for this orientation
-            while (enumerator.next()) { //if it can still enumerate
-                Piece candidate = enumerator.next_piece;  //set the next enumerate as candidate
-                Board cboard = board.clone(); //have a new board to test the candidate
-                //System.out.printf("new candidate x: %d y: %d", candidate.getX(), candidate.getY());
-                router = new Router(board, piece); //initialize the router
-                ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(),false);
-                if (testm != null) {  //if the candidate can be routed
-                    int rating = Rater.rate(cboard.bindBoard(candidate.getBoard())); //give a rating for the current candidate
-                    if (rating > max) { //if greater than the current max
-                        max = rating; //candidate becomes the max
-                        moves=testm; //store the candidate's moves to return
-                    }
+        enumerator = new Enumerator(board, test); //initialize the enumerator for this orientation
+        enumerator.enumerate();
+        Piece candidate;
+        for (candidate = enumerator.next(); candidate != null; candidate = enumerator.next()) { //if it still has next candidate
+            Board cboard = board.clone(); //have a new board to test the candidate
+            router = new Router(board, piece); //initialize the router
+            ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(), false);
+            if (testm != null) {  //if the candidate can be routed
+                cboard.bindPiece(candidate);
+                int rating = rater.rate(cboard); //give a rating for the current candidate
+                if (rating > max) { //if greater than the current max
+                    max = rating; //candidate becomes the max
+                    moves = (ArrayList<GameMove>) testm.clone(); //store the candidate's moves to return
                 }
             }
-            test.move(GameMove.CW, board); //goto the next orientation
         }
+        System.out.println("max:" + max);
+        //printMove(moves);
+        System.out.println("xxxxxxxxxxxxxxxxxx");
         movecount = 0;
         return moves != null ? moves : null; //need to check if this function returns to null
     }
 
     public GameMove getMove() {
         if (moves != null && moves.size() > movecount) {
-            if ((GameMove)moves.get(movecount) == GameMove.DOWN) {
+            if ((GameMove) moves.get(movecount) == GameMove.DOWN) {
                 movecount++;
                 return GameMove.NULL;
             } else {
-                return (GameMove)moves.get(movecount++);
+                return (GameMove) moves.get(movecount++);
             }
         } else {
             System.out.println("it's null~~~");
             return null;
         }
     }
-    
-    /*public GameMove[] convert_move(ArrayList<GameMove> g){
-        GameMove[] x
-        for(int i=0;i<g.size();i++){
-            
+
+    public void printMove(ArrayList<GameMove> x) {
+        for (int i = 0; i < x.size(); i++) {
+            System.out.println(x.get(i));
         }
-    }*/
+    }
 }

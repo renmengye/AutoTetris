@@ -57,7 +57,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                 action();
             }
         };
-        t = new Timer(500, performer);
+        t = new Timer(100, performer);
         t.start();
         setFocusable(true);
         requestFocus();
@@ -81,11 +81,8 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
     // TODO overwrite start(), stop() and destroy() methods
     
     public void action() {
-        //System.out.println(automode);
-        //System.out.println(board.check_done(piece, GameMove.DOWN));
         if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
-            //System.out.println("it's done");
-            board.setBoard(board.bindBoard(piece.getBoard()).getBoard()); //the piece become history
+            board.bindPiece(piece); //the piece become history
             int pscore = board.checkFull(); //check if there is any score gained
             if (pscore != 0) { //if there is score
                 score += pscore; //then add score
@@ -136,15 +133,16 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                             move = GameMove.CW;
                             break;
                         case KeyEvent.VK_UP:
-                            move = GameMove.CCW;
+                            move = GameMove.CW;
                             break;
                         case KeyEvent.VK_ENTER:
-                            random = new Random();
+                            random = new Random(1234);
                             score = 0;
                             initPiece();
                             board = new Board();
                             tcanvas.setBoard(board);
                             tcanvas.setPiece(piece);
+                            tcanvas.setScore(score);
                             break;
                         case KeyEvent.VK_SPACE:
                             if (t.isRunning()) {
@@ -159,20 +157,21 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                             player.genMoves(board, piece);
                             break;
                     }
-                    if (!board.check_done(piece, move)) {
-                        piece.move(move, board);
-                    }
+                    //if (!board.check_done(piece, move)) {
+                    piece.move(move, board);
+                    //}
                     break;
                 }
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            random = new Random();
+                            random = new Random(1234);
                             score = 0;
                             initPiece();
                             board = new Board();
                             tcanvas.setBoard(board);
                             tcanvas.setPiece(piece);
+                            tcanvas.setScore(score);
                             t.start();
                             break;
                     }
@@ -192,13 +191,14 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                     board = new Board();
                     tcanvas.setBoard(board);
                     tcanvas.setPiece(piece);
+                    tcanvas.setScore(score);
+                    player.genMoves(board, piece);
                     if (tcanvas.getStatus() == GameStatus.DEAD) {
                         t.start();
                     }
                     break;
             }
         }
-        e.consume();
     }
 
     public void keyTyped(KeyEvent e) {

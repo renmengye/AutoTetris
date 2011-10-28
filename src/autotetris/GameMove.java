@@ -36,4 +36,22 @@ public enum GameMove {
     public static GameMove get(int num) {
         return lookup.get(num);
     }
+    
+    public static GameMove reverse(GameMove x){
+        switch(x){
+            case UP:
+                return DOWN;
+            case DOWN:
+                return UP;
+            case LEFT:
+                return RIGHT;
+            case RIGHT:
+                return LEFT;
+            case CW:
+                return CCW;
+            case CCW:
+                return CW;
+        }
+        return NULL;
+    }
 }
