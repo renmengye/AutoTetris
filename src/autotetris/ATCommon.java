@@ -15,6 +15,7 @@ public interface ATCommon {
             XDIM = TWIDTH / XNUM - GAP, YDIM = THEIGHT / YNUM - 2;
     //public static final int SHAPE_O=0,SHAPE_I=1,SHAPE_S=2,SHAPE_Z=3,SHAPE_J=4,SHAPE_L=5,SHAPE_T=6,SHAPE_NUM=7;
     public static final int[] O_NUM = {1, 2, 2, 2, 4, 4, 4};
+    //probablity: not used in this application anymore
     public static final byte[][] PROB = {{10, 15, 15, 15, 10, 10, 25},
                                         {20, 5, 20, 20, 10, 10, 15},
                                         {0, 0, 0, 0, 0, 1, 0},
@@ -22,27 +23,7 @@ public interface ATCommon {
                                         {20, 15, 15, 15, 10, 10, 15},
                                         {20, 15, 15, 15, 10, 10, 15},
                                         {15, 30, 15, 15, 5, 5, 15}};
-    //public static final int CW0=0,CW90=1,CW180=2,CW270=3,CCW90=3,CCW180=2;
-    //RANGE(SHAPE,ORIENTATION,RANGE)
-    //obsolete constant
-    /**
-    public static final byte[][][] RANGE2 = {{{1, XNUM, 0, YNUM - 1}},
-                                            {{2, XNUM - 1, 0, YNUM}, {0, XNUM, 2, YNUM - 1}},
-                                            {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}},
-                                            {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}},
-                                            {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}},
-                                            {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}},
-                                            {{1, XNUM - 1, 0, YNUM - 1}, {1, XNUM, 1, YNUM - 1}, {1, XNUM - 1, 1, YNUM}, {0, XNUM - 1, 1, YNUM - 1}}};
-    
-    //range value is obsolete
-    public static final byte[][][] RANGE3 = {{{1, XNUM-1, 0, YNUM - 2}},
-                                            {{2, XNUM - 2, 0, YNUM-1}, {0, XNUM-1, 2, YNUM - 2}},
-                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}},
-                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}},
-                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}},
-                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}},
-                                            {{1, XNUM - 2, 0, YNUM - 2}, {1, XNUM-1, 1, YNUM - 2}, {1, XNUM - 2, 1, YNUM-1}, {0, XNUM - 2, 1, YNUM - 2}}};
-    public static final int RANGE_XLB = 0, RANGE_XUB = 1, RANGE_YLB = 2, RANGE_YUB = 3;*/
+    //contour constants
     public static final int CONTOUR_DX = 0, CONTOUR_DY = 1;
     //SHAPE_MAP(SHAPE,ORIENTATION,GRID,D)
     public static final byte[][][][] CONTOUR = {{{{-1, 0}, {0, 0}, {-1, 1}, {0, 1}}},

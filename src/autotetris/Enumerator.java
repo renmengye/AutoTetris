@@ -22,8 +22,7 @@ public class Enumerator implements ATCommon {
         this.candidates = new ArrayList<Piece>();
     }
 
-    public void enumerate() {
-        boolean found = false;
+    public void enumerate() { //enumerate every circustance
         Piece test_piece;
         for (int j = YNUM - 1; j >= 0; j--) { //search from bottom
             for (int i = 0; i < XNUM; i++) {
@@ -39,7 +38,7 @@ public class Enumerator implements ATCommon {
         }
     }
 
-    public Piece next() {
+    public Piece next() { //pops out the next candidate in the list
         if (candidates.size() > 0) {
             Piece next = (Piece) candidates.get(0);
             candidates.remove(0);
@@ -49,7 +48,7 @@ public class Enumerator implements ATCommon {
         }
     }
 
-    private boolean occupy_check(Piece piece, int x, int y) {
+    private boolean occupy_check(Piece piece, int x, int y) { //check if the board position is occupied
         for (int k = 0; k <= 3; k++) {
             int dx = piece.contour[k][0];
             int dy = piece.contour[k][1];

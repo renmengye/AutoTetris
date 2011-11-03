@@ -36,11 +36,11 @@ public class Player implements ATCommon {
         for (candidate = enumerator.next(); candidate != null; candidate = enumerator.next()) { //if it still has next candidate
             Board cboard = board.clone(); //have a new board to test the candidate
             router = new Router(board, piece); //initialize the router
-            ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(), false);
-            if (testm != null) {  //if the candidate can be routed
-                cboard.bindPiece(candidate);
-                int rating = rater.rate(cboard); //give a rating for the current candidate
-                if (rating > max) { //if greater than the current max
+            cboard.bindPiece(candidate);
+            int rating = rater.rate(cboard); //give a rating for the current candidate
+            if (rating > max) { //if greater than the current max
+                ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(), false);
+                if (testm != null) {
                     max = rating; //candidate becomes the max
                     moves = (ArrayList<GameMove>) testm.clone(); //store the candidate's moves to return
                 }

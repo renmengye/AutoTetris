@@ -19,7 +19,7 @@ import javax.swing.JApplet;
  *
  * @author rmy
  */
-public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, MouseListener {
+public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
 
     /**
      * Initialization method that will be called after the applet is loaded
@@ -35,7 +35,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
     private int score;
     private boolean automode; //if it is AI's show
     private Player player; //computer AI agent
-    
+
     @Override
     public void init() {
         // TODO start asynchronous download of heavy resources
@@ -43,12 +43,12 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
         random = new Random();
         move = GameMove.NULL;
         score = 0;
-        piece=initPiece();
+        piece = initPiece();
         tcanvas = new TCanvas(board, piece);
         automode = true;
         player = new Player();
-        if(automode){
-            player.genMoves(board,piece);
+        if (automode) {
+            player.genMoves(board, piece);
         }
         initCanvas();
         performer = new ActionListener() { //Declare the methods for each timer action
@@ -62,25 +62,36 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
         setFocusable(true);
         requestFocus();
         addKeyListener(this);
-        addMouseListener(this);
     }
-    
+
     public final Piece initPiece() {
         int type = random.nextInt(7); //generate random piece type
         int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
         Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
         return new_piece;
     }
-    
+
     public final void initCanvas() {
         tcanvas.setSize(TWIDTH, THEIGHT);
         tcanvas.setBackground(Color.WHITE);
         tcanvas.setStatus(GameStatus.PLAY);
         this.add(tcanvas);
     }
+
+    public void new_game() {
+        random = new Random();
+        score = 0;
+        initPiece();
+        board = new Board();
+        player.genMoves(board, piece);
+        tcanvas.setBoard(board);
+        tcanvas.setPiece(piece);
+        tcanvas.setScore(score);
+        t.start();
+    }
     // TODO overwrite start(), stop() and destroy() methods
-    
-    public void action() {
+
+    public void action() { //timer action
         if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
             board.bindPiece(piece); //the piece become history
             int pscore = board.checkFull(); //check if there is any score gained
@@ -113,7 +124,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
         move = GameMove.NULL;
         tcanvas.repaint();
     }
-    
+
     public void keyPressed(KeyEvent e) {
         if (!automode) { //if not automode
             switch (tcanvas.getStatus()) {
@@ -136,13 +147,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                             move = GameMove.CW;
                             break;
                         case KeyEvent.VK_ENTER:
-                            random = new Random(1234);
-                            score = 0;
-                            initPiece();
-                            board = new Board();
-                            tcanvas.setBoard(board);
-                            tcanvas.setPiece(piece);
-                            tcanvas.setScore(score);
+                            new_game();
                             break;
                         case KeyEvent.VK_SPACE:
                             if (t.isRunning()) {
@@ -165,14 +170,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            random = new Random(1234);
-                            score = 0;
-                            initPiece();
-                            board = new Board();
-                            tcanvas.setBoard(board);
-                            tcanvas.setPiece(piece);
-                            tcanvas.setScore(score);
-                            t.start();
+                            new_game();
                             break;
                     }
                 }
@@ -186,16 +184,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
                     break;
                 case KeyEvent.VK_ENTER:
                     random = new Random();
-                    score = 0;
-                    initPiece();
-                    board = new Board();
-                    tcanvas.setBoard(board);
-                    tcanvas.setPiece(piece);
-                    tcanvas.setScore(score);
-                    player.genMoves(board, piece);
-                    if (tcanvas.getStatus() == GameStatus.DEAD) {
-                        t.start();
-                    }
+                    new_game();
                     break;
             }
         }
@@ -206,13 +195,4 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener, 
 
     public void keyReleased(KeyEvent e) {
     }
-    
-    public void mouseEntered( MouseEvent e ) { }
-   public void mouseExited( MouseEvent e ) { }
-   public void mousePressed( MouseEvent e ) { }
-   public void mouseReleased( MouseEvent e ) { }
-   public void mouseClicked( MouseEvent e ) {
-       automode = !automode;
-       e.consume();
-   }
 }

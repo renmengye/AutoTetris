@@ -20,6 +20,17 @@ import javax.swing.JFrame;
 
 public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
 
+    private TCanvas tcanvas;
+    private Board board; //store current fixed grid
+    private Timer t;
+    private GameMove move; //store the keyboard action for the piece
+    private Piece piece; //store a current moving piece
+    private Random random;
+    private ActionListener performer;
+    private int score; //store the score of the game
+    private boolean automode; //if it is AI's show
+    private Player player; //computer AI agent
+
     public AutoTetrisView(SingleFrameApplication app) {
         super(app);
         initComponents();
@@ -32,7 +43,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         mainFrame.addKeyListener(this);
         menuBar.setVisible(false);
         board = new Board();
-        random = new Random(1234);
+        random = new Random();
         move = GameMove.NULL;
         score = 0;
         piece = initPiece();
@@ -55,33 +66,70 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         t.start();
     }
 
-    public void action() {
-        //System.out.println("major board checking");
-        //board.printBoard();
-        if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
-            board.bindPiece(piece); //the piece become history
-            int pscore = board.checkFull(); //check if there is any score gained
-            if (pscore != 0) { //if there is score
-                score += pscore; //then add score
-                tcanvas.setScore(score);
-            }
-            piece = initPiece(); //initialize a new piece
-            tcanvas.setPiece(piece);
-            if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
-                tcanvas.setStatus(GameStatus.DEAD);
-                t.stop();
-                System.out.println("piece dead");
-            } else {
-                if (automode) { //if it is automode then generate moves
-                    player.genMoves(board, piece);
+    public final void initCanvas() { //initialize canvas
+        tcanvas.setSize(TWIDTH, THEIGHT);
+        tcanvas.setBackground(Color.WHITE);
+        tcanvas.setStatus(GameStatus.PLAY);
+        mainPanel.add(tcanvas);
+    }
+
+    public final Piece initPiece() { //initialize piece
+        int type = random.nextInt(7); //generate random piece type
+        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
+        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
+        return new_piece;
+    }
+
+    public void new_game() {
+        random = new Random();
+        score = 0;
+        initPiece();
+        board = new Board();
+        tcanvas.setBoard(board);
+        tcanvas.setPiece(piece);
+        tcanvas.setScore(score);
+        player.genMoves(board, piece);
+        t.start();
+    }
+
+    public void action() { //timer action
+        if (!automode) {
+            if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
+                board.bindPiece(piece); //the piece become history
+                int pscore = board.checkFull(); //check if there is any score gained
+                if (pscore != 0) { //if there is score
+                    score += pscore; //then add score
+                    tcanvas.setScore(score);
+                }
+                piece = initPiece(); //initialize a new piece
+                tcanvas.setPiece(piece);
+                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                    tcanvas.setStatus(GameStatus.DEAD);
+                    t.stop();
+                    System.out.println("piece dead");
                 }
             }
         } else {
-            if (automode) { //if automode then execute next move
-                GameMove tmove = player.getMove();
-                if (tmove != null) {
-                    piece.move(tmove, board);
+            GameMove tmove = player.getMove();
+            if (board.check_done(piece, GameMove.DOWN) && tmove == null) {
+                board.bindPiece(piece); //the piece become history
+                int pscore = board.checkFull(); //check if there is any score gained
+                if (pscore != 0) { //if there is score
+                    score += pscore; //then add score
+                    tcanvas.setScore(score);
                 }
+                piece = initPiece(); //initialize a new piece
+                tcanvas.setPiece(piece);
+                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                    tcanvas.setStatus(GameStatus.DEAD);
+                    t.stop();
+                    System.out.println("piece dead");
+                } else {
+                    player.genMoves(board, piece);
+                }
+            }
+            if (tmove != null) {
+                piece.move(tmove, board);
             }
             if (!board.check_done(piece, GameMove.DOWN)) { //move down as usual
                 piece.move(GameMove.DOWN, board);
@@ -91,7 +139,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         tcanvas.repaint();
     }
 
-    public void keyPressed(KeyEvent e) {
+    public void keyPressed(KeyEvent e) { //keyboard control
         if (!automode) { //if not automode
             switch (tcanvas.getStatus()) {
                 case PLAY: {
@@ -113,13 +161,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                             move = GameMove.CW;
                             break;
                         case KeyEvent.VK_ENTER:
-                            random = new Random(1234);
-                            score = 0;
-                            initPiece();
-                            board = new Board();
-                            tcanvas.setBoard(board);
-                            tcanvas.setPiece(piece);
-                            tcanvas.setScore(score);
+                            new_game();
                             break;
                         case KeyEvent.VK_SPACE:
                             if (t.isRunning()) {
@@ -134,7 +176,6 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                             player.genMoves(board, piece);
                             break;
                     }
-                    //if (!board.check_done(piece, move)) {
                     piece.move(move, board);
                     //}
                     break;
@@ -142,14 +183,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            random = new Random(1234);
-                            score = 0;
-                            initPiece();
-                            board = new Board();
-                            tcanvas.setBoard(board);
-                            tcanvas.setPiece(piece);
-                            tcanvas.setScore(score);
-                            t.start();
+                            new_game();
                             break;
                     }
                 }
@@ -162,17 +196,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                     automode = !automode;
                     break;
                 case KeyEvent.VK_ENTER:
-                    random = new Random();
-                    score = 0;
-                    initPiece();
-                    board = new Board();
-                    tcanvas.setBoard(board);
-                    tcanvas.setPiece(piece);
-                    tcanvas.setScore(score);
-                    player.genMoves(board, piece);
-                    if (tcanvas.getStatus() == GameStatus.DEAD) {
-                        t.start();
-                    }
+                    new_game();
                     break;
             }
         }
@@ -182,30 +206,6 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     }
 
     public void keyReleased(KeyEvent e) {
-    }
-
-    @Action
-    public void showAboutBox() {
-        if (aboutBox == null) {
-            JFrame mainFrame = AutoTetrisApp.getApplication().getMainFrame();
-            aboutBox = new AutoTetrisAboutBox(mainFrame);
-            aboutBox.setLocationRelativeTo(mainFrame);
-        }
-        //AutoTetrisApp.getApplication().show(aboutBox);
-    }
-
-    public final void initCanvas() {
-        tcanvas.setSize(TWIDTH, THEIGHT);
-        tcanvas.setBackground(Color.WHITE);
-        tcanvas.setStatus(GameStatus.PLAY);
-        mainPanel.add(tcanvas);
-    }
-
-    public final Piece initPiece() {
-        int type = random.nextInt(7); //generate random piece type
-        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
-        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
-        return new_piece;
     }
 
     /** This method is called from within the constructor to
@@ -267,15 +267,4 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     private javax.swing.JPanel mainPanel;
     private javax.swing.JMenuBar menuBar;
     // End of variables declaration//GEN-END:variables
-    private JDialog aboutBox;
-    private TCanvas tcanvas;
-    private Board board; //store current fixed grid
-    private Timer t;
-    private GameMove move; //store the keyboard action for the piece
-    private Piece piece; //store a current moving piece
-    private Random random;
-    private ActionListener performer;
-    private int score;
-    private boolean automode; //if it is AI's show
-    private Player player; //computer AI agent
 }
