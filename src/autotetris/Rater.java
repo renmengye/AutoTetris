@@ -11,9 +11,9 @@ package autotetris;
 public class Rater implements ATCommon {
 
     public static final int height_coef = -50;
-    public static final int holes_coef = -100;
+    public static final int holes_coef = -150;
     public static final int density_coef = 0;
-    public static final int targeth_coef = -20;
+    public static final int targeth_coef = -10;
     public static final int score_coef = 10000;
     private Board board;
 
@@ -39,7 +39,7 @@ public class Rater implements ATCommon {
             }
         }
         height = YNUM - height;
-        return height*height/10;
+        return height * height / 7;
     }
 
     private int rate_holes(Board board) {
@@ -83,8 +83,12 @@ public class Rater implements ATCommon {
                 }
             }
         }
-        if (j < YNUM * 2 / 3) {
-            return j;
+        if (j < YNUM / 3) {
+            if (j - targeth > YNUM / 3) {
+                return j + 2;
+            } else {
+                return j;
+            }
         } else if (j - targeth > 2) {
             return j - 2;
         } else {
