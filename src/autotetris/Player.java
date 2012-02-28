@@ -3,6 +3,7 @@
  */
 package autotetris;
 
+import java.io.DataInputStream;
 import java.util.ArrayList;
 
 /**
@@ -15,7 +16,7 @@ public class Player implements ATCommon {
     private Piece piece;
     private Enumerator enumerator; //first enumerate
     private Router router; // then check if it is possible to form a route
-    private Rater rater; //lastly give a rating for the circumstance
+    public Rater rater; //lastly give a rating for the circumstance
     //private GameMove[] moves;
     private ArrayList<GameMove> moves;
     private static int movecount;
@@ -33,22 +34,35 @@ public class Player implements ATCommon {
         enumerator = new Enumerator(board, test); //initialize the enumerator for this orientation
         enumerator.enumerate();
         Piece candidate;
+        Board maxboard = new Board();
+        Piece maxpiece = piece.clone();
         for (candidate = enumerator.next(); candidate != null; candidate = enumerator.next()) { //if it still has next candidate
             Board cboard = board.clone(); //have a new board to test the candidate
             router = new Router(board, piece); //initialize the router
             cboard.bindPiece(candidate);
-            int rating = rater.rate(cboard); //give a rating for the current candidate
+            int rating = rater.rate(cboard,candidate); //give a rating for the current candidate
             if (rating > max) { //if greater than the current max
                 ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(), false);
                 if (testm != null) {
+                    maxboard=cboard.clone();
+                    maxpiece=candidate.clone();
                     max = rating; //candidate becomes the max
                     moves = (ArrayList<GameMove>) testm.clone(); //store the candidate's moves to return
                 }
             }
         }
-        System.out.println("max:" + max);
+        //System.out.printf("\ntype: %s max: %d\n", piece.getType(),max);
+        //maxboard.printBoard(maxpiece);
         //printMove(moves);
-        System.out.println("xxxxxxxxxxxxxxxxxx");
+        //System.out.println("xxxxxxxxxxxxxxxxxx");
+        
+        /*DataInputStream cinput = new DataInputStream(System.in);
+        try{
+            String bind = cinput .readLine();
+        }catch(Exception e){
+            
+        }*/
+       
         movecount = 0;
         return moves != null ? moves : null; //need to check if this function returns to null
     }
@@ -62,7 +76,7 @@ public class Player implements ATCommon {
                 return (GameMove) moves.get(movecount++);
             }
         } else {
-            System.out.println("it's null~~~");
+            //System.out.println("it's null~~~");
             return null;
         }
     }

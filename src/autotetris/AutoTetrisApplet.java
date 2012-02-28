@@ -57,7 +57,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
                 action();
             }
         };
-        t = new Timer(100, performer);
+        t = new Timer(50, performer);
         t.start();
         setFocusable(true);
         requestFocus();
@@ -92,30 +92,43 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
     // TODO overwrite start(), stop() and destroy() methods
 
     public void action() { //timer action
-        if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
-            board.bindPiece(piece); //the piece become history
-            int pscore = board.checkFull(); //check if there is any score gained
-            if (pscore != 0) { //if there is score
-                score += pscore; //then add score
-                tcanvas.setScore(score);
-            }
-            piece = initPiece(); //initialize a new piece
-            tcanvas.setPiece(piece);
-            if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
-                tcanvas.setStatus(GameStatus.DEAD);
-                t.stop();
-                System.out.println("piece dead");
-            } else {
-                if (automode) { //if it is automode then generate moves
-                    player.genMoves(board, piece);
+        if (!automode) {
+            if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
+                board.bindPiece(piece); //the piece become history
+                int pscore = board.checkFull(); //check if there is any score gained
+                if (pscore != 0) { //if there is score
+                    score += pscore; //then add score
+                    tcanvas.setScore(score);
+                }
+                piece = initPiece(); //initialize a new piece
+                tcanvas.setPiece(piece);
+                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                    tcanvas.setStatus(GameStatus.DEAD);
+                    t.stop();
+                    System.out.println("piece dead");
                 }
             }
         } else {
-            if (automode) { //if automode then execute next move
-                GameMove tmove = player.getMove();
-                if (tmove != null) {
-                    piece.move(tmove, board);
+            GameMove tmove = player.getMove();
+            if (board.check_done(piece, GameMove.DOWN) && tmove == null) {
+                board.bindPiece(piece); //the piece become history
+                int pscore = board.checkFull(); //check if there is any score gained
+                if (pscore != 0) { //if there is score
+                    score += pscore; //then add score
+                    tcanvas.setScore(score);
                 }
+                piece = initPiece(); //initialize a new piece
+                tcanvas.setPiece(piece);
+                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                    tcanvas.setStatus(GameStatus.DEAD);
+                    t.stop();
+                    System.out.println("piece dead");
+                } else {
+                    player.genMoves(board, piece);
+                }
+            }
+            if (tmove != null) {
+                piece.move(tmove, board);
             }
             if (!board.check_done(piece, GameMove.DOWN)) { //move down as usual
                 piece.move(GameMove.DOWN, board);

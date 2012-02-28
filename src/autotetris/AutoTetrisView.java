@@ -19,7 +19,6 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 
 public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
-
     private TCanvas tcanvas;
     private Board board; //store current fixed grid
     private Timer t;
@@ -41,28 +40,27 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         mainFrame.setLocation(200, 200);
         mainFrame.setResizable(false);
         mainFrame.addKeyListener(this);
+        mainFrame.setVisible(false);
+        tcanvas = new TCanvas(board, piece);
+        initCanvas();
         menuBar.setVisible(false);
         board = new Board();
         random = new Random();
         move = GameMove.NULL;
         score = 0;
         piece = initPiece();
-        tcanvas = new TCanvas(board, piece);
         automode = true;
         player = new Player();
-        //board.printBoard();
         if (automode) {
             player.genMoves(board, piece);
         }
-        //board.printBoard();
-        initCanvas();
         performer = new ActionListener() { //Declare the methods for each timer action
 
             public void actionPerformed(ActionEvent e) {
                 action();
             }
         };
-        t = new Timer(100, performer);
+        t = new Timer(50, performer);
         t.start();
     }
 

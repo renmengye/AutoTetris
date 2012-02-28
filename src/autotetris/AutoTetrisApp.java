@@ -15,8 +15,17 @@ public class AutoTetrisApp extends SingleFrameApplication {
     /**
      * At startup create and show the main frame of the application.
      */
+    
+    
     @Override protected void startup() {
-        show(new AutoTetrisView(this));
+        AutoTetrisView view=new AutoTetrisView(this);
+        show(view);
+        view.new_game();
+        //AutoTetrisCommand command=new AutoTetrisCommand();
+        //for(int i=0;i<=99;i++){
+            //command.new_game();
+            //while(command.t.isRunning());
+        //}
     }
 
     /**

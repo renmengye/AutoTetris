@@ -46,10 +46,12 @@ public class Router {
                             }
                         }
                     }
+                    ArrayList<GameMove> tmoves;
                     if (possible_drop && j > 0) { //if the drop is possible
                         moves.add(0, GameMove.DROP);
                     }
-                    ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
+                    
+                        tmoves = route(test, moves, true); //recursion occurs here
                     if (tmoves != null) {
                         return tmoves;
                     } else {
@@ -61,40 +63,31 @@ public class Router {
             } else { //if the object is already dropped, then search horizontally and rotationally (only one)
                 for (int i = 2; i <= 6; i++) { //search all possible moves in GameMove
                     GameMove move = GameMove.get(i);
-                    if (move == GameMove.LEFT && dx < 0) { //get rid of redundant moves (might have better method than this)
-                        continue;
-                    } else if (move == GameMove.RIGHT && dx > 0) {
-                        continue;
-                    } else if (dr == 0 && (move == GameMove.CW || move == GameMove.CW)) {
-                        continue;
-                    } else { // now start search
-                        Piece test = piece.clone();
-                        if (moves.isEmpty()) {
-                            if (!board.check_done(test, GameMove.reverse(move))) {
-                                if (test.revmove(move, board)) { //if it is a possible move
-                                    moves.add(0, move);
-                                    ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                                    if (tmoves != null) {
-                                        return tmoves;
-                                    } else {
-                                        moves.remove(0);
-                                    }
-                                }
-                            }
-                        } else {
-                            if (!board.check_done(test, GameMove.UP) && !board.check_done(test, GameMove.reverse(move))) {
-                                if (test.revmove(GameMove.DOWN, board) && test.revmove(move, board)) { //if it is a possible move
-                                    moves.add(0, move);
-                                    ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                                    if (tmoves != null) {
-                                        return tmoves;
-                                    } else {
-                                        moves.remove(0);
-                                    }
+                    Piece test = piece.clone();
+                    if (moves.isEmpty()) {
+                        if (!board.check_done(test, GameMove.reverse(move))) {
+                            if (test.revmove(move, board)) { //if it is a possible move
+                                moves.add(0, move);
+                                ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
+                                if (tmoves != null) {
+                                    return tmoves;
+                                } else {
+                                    moves.remove(0);
                                 }
                             }
                         }
-
+                    } else {
+                        if (!board.check_done(test, GameMove.UP) && !board.check_done(test, GameMove.reverse(move))) {
+                            if (test.revmove(GameMove.DOWN, board) && test.revmove(move, board)) { //if it is a possible move
+                                moves.add(0, move);
+                                ArrayList<GameMove> tmoves = route(test, moves, true); //recursion occurs here
+                                if (tmoves != null) {
+                                    return tmoves;
+                                } else {
+                                    moves.remove(0);
+                                }
+                            }
+                        }
                     }
                 }
             }

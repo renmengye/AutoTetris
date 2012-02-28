@@ -14,7 +14,7 @@ import java.util.Map;
  */
 public enum GameMove {
 
-    DROP(0), DOWN(1), LEFT(2), RIGHT(3), CW(4), CCW(5), NULL(6),UP(7);
+    DROP(0), DOWN(1), NULL(2), LEFT(3), RIGHT(4), CW(5), CCW(6), UP(7);
     int num;
     //int dxy[];
 
