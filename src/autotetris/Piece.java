@@ -17,25 +17,17 @@ public class Piece implements ATCommon {
     public Piece(PieceType type, Orientation orient) {
         this.type = type;
         this.orient = orient;
-        //this.range = RANGE[type.value()][orient.value()];
         this.contour = CONTOUR[type.value()][orient.value()];
         this.x = XNUM / 2;
         this.y = START_Y[type.value()][orient.value()];
-        //System.out.printf("x:%d y:%d t:%s o:%s",x,y,type,orient);
-        //this.y = START_Y[type.value()][orient.value()];
-        //this.board = new Board();
-        //genBoard();
     }
 
     public Piece(PieceType type, Orientation orient, int x, int y) {
         this.type = type;
         this.orient = orient;
-        //this.range = RANGE[type.value()][orient.value()];
         this.contour = CONTOUR[type.value()][orient.value()];
         this.x = x;
         this.y = y;
-        //this.board = new Board();
-        //genBoard();
     }
 
     //return current x
@@ -61,34 +53,7 @@ public class Piece implements ATCommon {
     public int getContour(int i, int xy) {
         return contour[i][xy];
     }
-
-    //return the piece's single grid matrix //obsolete
-    /**public Board getBoard() {
-    return board;
-    }
     
-    //generate a new single grid matrix according to current x,y
-    //obsolete, in minimal use
-    
-    private boolean genBoard() {
-    int dx, dy;
-    byte[][] map = new byte[YNUM][XNUM];
-    //try {
-    for (int i = 0; i <= 3; i++) {
-    dx = contour[i][CONTOUR_DX];
-    dy = contour[i][CONTOUR_DY];
-    //System.out.printf("x: %d, y: %d, dx: %d, dy: %d, shape: %d, ori: %d",x,y,dx,dy,shape,orient);
-    if ((y + dy >= 0 && x + dx >= 0) && (y + dy < YNUM && x + dx < XNUM)) {
-    map[y + dy][x + dx] = 1;
-    }
-    }
-    //} catch (Exception e) {
-    //  return false;
-    //}
-    board.setBoard(map);
-    return true;
-    }*/
-    //manually set piece's x,y
     public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
@@ -161,7 +126,8 @@ public class Piece implements ATCommon {
         return true;
     }
 
-    public boolean check_range(int x, int y) { //check a certain piece is in the display area
+    //check a certain piece is in the display area
+    public boolean check_range(int x, int y) { 
         for (int i = 0; i <= 3; i++) {
             int dx = contour[i][CONTOUR_DX];
             int dy = contour[i][CONTOUR_DY];
@@ -172,7 +138,8 @@ public class Piece implements ATCommon {
         return true;
     }
 
-    public boolean check_point_range(int x, int y) { //check a certain point is the display area
+    //check a certain point is the display area
+    public boolean check_point_range(int x, int y) { 
         if ((y >= 0 && x >= 0) && (y < YNUM && x < XNUM)) {
             return true;
         } else {

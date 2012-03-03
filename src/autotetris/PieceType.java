@@ -21,6 +21,7 @@ public enum PieceType {
     public int value() {
         return num;
     }
+    
     private static final Map<Integer, PieceType> lookup = new HashMap<Integer, PieceType>();
 
     static {
