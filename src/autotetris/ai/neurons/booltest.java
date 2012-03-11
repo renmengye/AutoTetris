@@ -112,7 +112,7 @@ public class booltest {
          */
 
         final Random r = new Random();
-        Trainer train = new Trainer(0.01, 200) {
+        Trainer train = new Trainer(0.001, 200) {
 
             @Override
             public Example ex_gen() {
@@ -123,13 +123,14 @@ public class booltest {
                 u.add((double) r1);
                 u.add((double) r2);
                 v.add((double) xor(r1, r2));
-                System.out.printf("%d\t%d\t%d",r1,r2,xor(r1,r2));
                 return new FloatExample(u, v);
             }
         };
         train.start();
+        System.out.println("Training network started.");
         try {
             train.join();
+            System.out.println("Training network completed.\n");
         } catch (InterruptedException ex) {
             Logger.getLogger(booltest.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -146,7 +147,7 @@ public class booltest {
                     u.add((double) r1);
                     u.add((double) r2);
                     List<Double> result = n.test(new FloatExample(u));
-                    System.out.println("The neural network output: " + result.get(0));
+                    System.out.printf("The neural network output: %.2f\n",result.get(0));
                 } else {
                     System.out.println("Please input one or zero!");
                 }

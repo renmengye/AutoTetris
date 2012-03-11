@@ -26,7 +26,7 @@ public class Network {
     private Random r;
     
     //constructor with input size and output size
-    public Network(int is, int os) {
+    public Network(int is, int os, double lr) {
 
         inlay = new LinkedList<Neuron>();
         hidlay = new LinkedList<LinkedList<Neuron>>();
@@ -58,7 +58,7 @@ public class Network {
                     //return FuncHub.dsigmoid(a);
                 }
             };
-            n.set_rate(1);
+            n.set_rate(lr);
             outlay.add(n);
         }
 
@@ -93,7 +93,7 @@ public class Network {
         for (int j = 0; j < n; j++) {
 
             //universal id as 1000, 1001, 2000....
-            Perceptron p = new Perceptron(hidlay.size() * 1000 + layer.size()){
+            Perceptron p = new Perceptron((hidlay.size()+1) * 1000 + layer.size()){
 
                 @Override
                 public double activ_func(double a) {
@@ -107,6 +107,7 @@ public class Network {
                     //return FuncHub.dsigmoid(a);
                 }
             };
+            //p.set_rate(.8);
             layer.add(p);
         }
 

@@ -17,7 +17,8 @@ public class Trainer extends Thread{
     private double avg_num;
     
     public Trainer(double te, int an){
-        network=new Network(2,1);
+        network=new Network(2,1,1);
+        network.add_hidden_layer(2);
         tar_err=te;
         avg_num=an;
     }
@@ -35,11 +36,11 @@ public class Trainer extends Thread{
         double err=0.0;
         double err_avg=0.0;
         int count=0;
-        double rate=1;
+        double rate=.2;
         LinkedList<Double> error_list=new LinkedList<Double>();
         for(count=0;err_avg>tar_err|count<avg_num;count++) {
             err=network.train_once(ex_gen());
-            System.out.printf("count: %d, err: %5f, err_avg:%5f\n",count,err/rate,err_avg);
+            System.out.printf("count: %d\terror: %.2f\n",count,err/rate);
             if(error_list.size()>=avg_num){
                 err_avg-=Math.abs(error_list.pop())/(double)avg_num;
                 err_avg+=Math.abs(err)/(double)avg_num/rate;
