@@ -2,7 +2,7 @@
  * Author: Mengye Ren
  * This enumeration class specifies different shape of a piece
  */
-package autotetris;
+package autotetris.elements;
 
 import java.util.EnumSet;
 import java.util.HashMap;

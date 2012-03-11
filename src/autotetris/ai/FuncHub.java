@@ -110,11 +110,28 @@ public class FuncHub implements ATCommon{
     }
     
     
-    public static float gauss(){
-        return 0f;
+    public static double tanh(double a){
+        return Math.tanh(a);
     }
     
-    public static float linear(){
-        return 0f;
+    public static double dtanh(double a){
+        return (1-Math.pow(Math.tanh(a),2));
+    }
+    
+    public static double gauss(double a){
+        return Math.exp(-a*a);
+    }
+    
+    public static double dgauss(double a){
+        return Math.exp(-a*a)*(-1)*2*a;
+    }
+    
+    public static double sigmoid(double a){
+        return 1.0/(1+Math.exp(-a));
+    }
+    
+    public static double dsigmoid(double a){
+        double b=Math.exp(-a);
+        return b*Math.pow(1.0/(1+b),2);
     }
 }

@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package autotetris;
+package autotetris.ai.neurons;
 
 /**
  *
@@ -10,12 +6,23 @@ package autotetris;
  */
 public class OutputNeuron extends Neuron{
     
+    public Thread update; 
+    
     public OutputNeuron(int id){
         super(id);
     }
     
-    protected float activate(){
-        return 0f;
+    public void calc_error(double t){
+        error=rate*(t-value);
+    }
+    
+    public void update(){
+        update=new Thread(){
+            @Override
+            public void run(){
+                update_weight();
+            }
+        };
     }
     
 }

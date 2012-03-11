@@ -4,13 +4,14 @@
  */
 package autotetris.ai.neurons;
 
+import autotetris.ai.Example;
 import java.util.LinkedList;
 import autotetris.ai.FuncHub;
-import autotetris.ai.Function_a;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
+import org.omg.CORBA.TIMEOUT;
 
 /**
  *
@@ -23,15 +24,16 @@ public class Network {
     private LinkedList<Neuron> outlay;
     private int input_size, output_size;
     private Random r;
-
-    public Network(int input_size, int output_size) {
+    
+    //constructor with input size and output size
+    public Network(int is, int os) {
 
         inlay = new LinkedList<Neuron>();
         hidlay = new LinkedList<LinkedList<Neuron>>();
         outlay = new LinkedList<Neuron>();
 
-        this.input_size = input_size;
-        this.output_size = output_size;
+        this.input_size = is;
+        this.output_size = os;
 
         r = new Random();
 
@@ -39,22 +41,25 @@ public class Network {
         for (int j = 0; j < input_size; j++) {
             inlay.add(new SimpleInputNeuron(j));
         }
-
+        
+        //initializing output neurons
         for (int j = 0; j < output_size; j++) {
-            OutputNeuron n = new OutputNeuron(j, new Function_a() {
+            OutputNeuron n = new OutputNeuron(j){
 
-                public double func(double a) {
+                @Override
+                public double activ_func(double a) {
                     return FuncHub.gauss(a);
                     //return FuncHub.sigmoid(a);
                 }
 
-                public double dfunc(double a) {
+                @Override
+                public double activ_dfunc(double a) {
                     return FuncHub.dgauss(a);
                     //return FuncHub.dsigmoid(a);
                 }
-            });
-            n.set_rate(0.2);
-            inlay.add(n);
+            };
+            n.set_rate(1);
+            outlay.add(n);
         }
 
         connect(inlay, outlay);      //default with no hidden layer
@@ -88,18 +93,20 @@ public class Network {
         for (int j = 0; j < n; j++) {
 
             //universal id as 1000, 1001, 2000....
-            Perceptron p = new Perceptron(hidlay.size() * 1000 + layer.size(), new Function_a() {
+            Perceptron p = new Perceptron(hidlay.size() * 1000 + layer.size()){
 
-                public double func(double a) {
+                @Override
+                public double activ_func(double a) {
                     return FuncHub.gauss(a);
                     //return FuncHub.sigmoid(a);
                 }
 
-                public double dfunc(double a) {
+                @Override
+                public double activ_dfunc(double a) {
                     return FuncHub.dgauss(a);
                     //return FuncHub.dsigmoid(a);
                 }
-            });
+            };
             layer.add(p);
         }
 
@@ -116,10 +123,10 @@ public class Network {
         hidlay.add(layer);
     }
 
-    public List<Double> test(List<Double> v) {
+    public List<Double> test(Example ex) {
 
         //input the simple input neurons with list values
-        Iterator<Double> vi = v.listIterator();
+        Iterator<Double> vi = ex.input().listIterator();
         for (Neuron i : inlay) {
             if (vi.hasNext()) {
                 ((SimpleInputNeuron) i).input(vi.next());
@@ -133,22 +140,29 @@ public class Network {
 
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.feed.start();
+                n.feed();
+                //System.out.println("p-started");
             }
 
             //wait every neuron in the layer to finish
             try {
                 for (Neuron n : layer) {
                     n.feed.join();
+                    //System.out.println("p-joined");
                 }
             } catch (Exception e) {
-                System.out.println(e);
+                //System.out.println(e);
             }
         }
 
         //activating the output layer
         for (Neuron n : outlay) {
-            n.feed.start();
+            //if(!n.feed.isAlive()){
+            n.feed();
+            //}else{
+            //}
+            //System.out.println("o-started");
+            //n.calc_value();
         }
 
 
@@ -156,6 +170,7 @@ public class Network {
         try {
             for (Neuron n : outlay) {
                 n.feed.join();
+                //System.out.println("o-joined");
             }
         } catch (Exception e) {
             System.out.println(e);
@@ -173,11 +188,11 @@ public class Network {
 
     
     //train the network with one example return the error sum
-    public double train_once(List<Double> v, List<Double> c) {
+    public double train_once(Example ex) {
 
-        test(v);
+        test(ex);
 
-        Iterator<Double> ci = c.listIterator();
+        Iterator<Double> ci = ex.correct().listIterator();
 
         //output layer calculate error
         for (Neuron n : outlay) {
@@ -190,13 +205,14 @@ public class Network {
 
         //output layer update weights thread start
         for (Neuron n : outlay) {
-            ((OutputNeuron) n).update.start();
+            //((OutputNeuron) n).update.start();
+            n.update_weight();
         }
 
         //wait all threads join
         for (Neuron n : outlay) {
             try {
-                ((OutputNeuron) n).update.join();
+                ((OutputNeuron) n).update();
             } catch (Exception e) {
                 System.out.println(e);
             }
@@ -212,7 +228,7 @@ public class Network {
             
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.back.start();
+                n.back();
             }
 
             //wait every neuron in the layer to finish
@@ -225,7 +241,13 @@ public class Network {
             }
         }
         
-        return 0.0;
+        double esum=0.0;
+        
+        for(Neuron n:outlay){
+            esum+=n.error();
+        }
+        
+        return esum;
 
     }
 }

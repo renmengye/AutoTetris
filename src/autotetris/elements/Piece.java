@@ -3,14 +3,16 @@
  * The Piece Class provide an instance of a single piece.
  * Stores information of type, orientation and the single matrix.
  */
-package autotetris;
+package autotetris.elements;
+
+import autotetris.ATCommon;
 
 public class Piece implements ATCommon {
 
     private final PieceType type;
     private Orientation orient;
     //protected byte[] range; //the maximum of left, right, top and bottom
-    protected byte[][] contour; //the coordinates of each grid
+    public byte[][] contour; //the coordinates of each grid
     private int x, y; //stores x and y coordinates
     //private Board board; //stores the grid matrix of the single piece //obsolete
 

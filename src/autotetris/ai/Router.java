@@ -2,8 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package autotetris;
+package autotetris.ai;
 
+import autotetris.elements.Board;
+import autotetris.elements.GameMove;
+import autotetris.elements.Piece;
 import java.util.ArrayList;
 
 /**

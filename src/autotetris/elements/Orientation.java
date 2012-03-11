@@ -3,8 +3,9 @@
  * This enumeration class specifies different orientation of a piece
  */
 
-package autotetris;
+package autotetris.elements;
 
+import autotetris.ATCommon;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;

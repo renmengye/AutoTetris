@@ -1,9 +1,12 @@
 /*
  * This is a class that takes in board condition and piece and compute the gamemoves
  */
-package autotetris;
+package autotetris.ai;
 
-import java.io.DataInputStream;
+import autotetris.ATCommon;
+import autotetris.elements.Board;
+import autotetris.elements.GameMove;
+import autotetris.elements.Piece;
 import java.util.ArrayList;
 
 /**
@@ -29,7 +32,7 @@ public class Player implements ATCommon {
         this.board = board;
         this.piece = piece;
         moves = null;
-        int max = -1000;
+        float max = -1000f;
         Piece test = piece.clone();
         enumerator = new Enumerator(board, test); //initialize the enumerator for this orientation
         enumerator.enumerate();
@@ -51,18 +54,6 @@ public class Player implements ATCommon {
                 }
             }
         }
-        //System.out.printf("\ntype: %s max: %d\n", piece.getType(),max);
-        //maxboard.printBoard(maxpiece);
-        //printMove(moves);
-        //System.out.println("xxxxxxxxxxxxxxxxxx");
-        
-        /*DataInputStream cinput = new DataInputStream(System.in);
-        try{
-            String bind = cinput .readLine();
-        }catch(Exception e){
-            
-        }*/
-       
         movecount = 0;
         return moves != null ? moves : null; //need to check if this function returns to null
     }

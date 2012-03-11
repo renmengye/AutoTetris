@@ -4,6 +4,13 @@
  */
 package autotetris;
 
+import autotetris.ai.Rater;
+import autotetris.ai.Player;
+import autotetris.elements.Board;
+import autotetris.elements.PieceType;
+import autotetris.elements.Piece;
+import autotetris.elements.GameMove;
+import autotetris.elements.Orientation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
@@ -62,7 +69,8 @@ public class AutoTetrisCommand implements ATCommon{
         piece=initPiece();
         board = new Board();
         
-        player.rater=new Rater(height,holes,target,scorec,lhole);
+        //player.rater=new Rater(height,holes,target,scorec,lhole);
+        player.rater=new Rater();
         
         player.genMoves(board, piece);
         t.start();

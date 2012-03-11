@@ -4,6 +4,9 @@
  */
 package autotetris;
 
+import autotetris.elements.Board;
+import autotetris.elements.GameStatus;
+import autotetris.elements.Piece;
 import java.awt.Canvas;
 import java.awt.Graphics;
 

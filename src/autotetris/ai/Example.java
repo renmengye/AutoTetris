@@ -4,10 +4,19 @@
  */
 package autotetris.ai;
 
+import java.util.List;
+
 /**
  *
  * @author rmy
  */
-public class Example {
+public abstract class Example {
     
+    
+    
+    public abstract List input();
+    
+    public abstract List correct();
+    
+    public abstract String to_string();
 }

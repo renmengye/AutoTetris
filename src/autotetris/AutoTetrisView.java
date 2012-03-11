@@ -4,6 +4,13 @@
  */
 package autotetris;
 
+import autotetris.ai.Player;
+import autotetris.elements.Board;
+import autotetris.elements.GameStatus;
+import autotetris.elements.PieceType;
+import autotetris.elements.Piece;
+import autotetris.elements.GameMove;
+import autotetris.elements.Orientation;
 import java.awt.Color;
 import org.jdesktop.application.Action;
 import org.jdesktop.application.ResourceMap;

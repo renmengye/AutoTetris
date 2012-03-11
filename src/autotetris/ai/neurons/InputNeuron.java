@@ -1,20 +1,18 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package autotetris;
+package autotetris.ai.neurons;
 
-import java.util.ArrayList;
+import autotetris.elements.Board;
 
 /**
  *
  * @author rmy
  */
-public abstract class InputNeuron extends Neuron{
+public class InputNeuron extends Neuron{
     
     public InputNeuron(int id){
         super(id);
     }
     
-    protected abstract float activate();
+    public void sensor(Board board){
+        
+    }
 }

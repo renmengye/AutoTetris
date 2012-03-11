@@ -2,7 +2,11 @@
  * Author: Mengye Ren
  * Board Class provide an instance of the grid matrix and do matrix operation
  */
-package autotetris;
+package autotetris.elements;
+
+import autotetris.ATCommon;
+import autotetris.elements.Piece;
+import autotetris.elements.GameMove;
 
 public class Board implements ATCommon {
 
