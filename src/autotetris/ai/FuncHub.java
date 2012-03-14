@@ -8,6 +8,22 @@ import autotetris.elements.Board;
  * @author MengYe
  */
 public class FuncHub implements ATCommon{
+
+    public static int xor(double a, double b) {
+        if ((a == 0 && b != 0) || (b == 0 && a != 0)) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public static int and(double a, double b) {
+        if (a != 0 && b != 0) {
+            return 1;
+        } else {
+            return 0;
+        }
+    }
     
     public static int score(Board board){
         return board.checkFull();

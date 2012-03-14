@@ -1,9 +1,6 @@
 package autotetris.ai.neurons;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 /**
@@ -66,6 +63,10 @@ public abstract class Neuron {
 
     public void reset_source() {
         source.clear();
+    }
+    
+    public Collection<Double> get_weight(){
+        return source.values();
     }
 
     public double activ_func(double a) {
