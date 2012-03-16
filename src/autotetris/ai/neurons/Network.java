@@ -5,13 +5,8 @@
 package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
-import java.util.LinkedList;
 import autotetris.ai.FuncHub;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
-import org.omg.CORBA.TIMEOUT;
+import java.util.*;
 
 /**
  *
@@ -187,7 +182,6 @@ public class Network {
 
     }
 
-    
     //train the network with one example return the error sum
     public double train_once(Example ex) {
 
