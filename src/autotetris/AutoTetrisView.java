@@ -5,42 +5,34 @@
 package autotetris;
 
 import autotetris.ai.Player;
-import autotetris.elements.Board;
-import autotetris.elements.GameStatus;
-import autotetris.elements.PieceType;
-import autotetris.elements.Piece;
-import autotetris.elements.GameMove;
-import autotetris.elements.Orientation;
+import autotetris.elements.*;
 import java.awt.Color;
-import org.jdesktop.application.Action;
-import org.jdesktop.application.ResourceMap;
-import org.jdesktop.application.SingleFrameApplication;
-import org.jdesktop.application.FrameView;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.Random;
-import javax.swing.Timer;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
+import javax.swing.Timer;
+import org.jdesktop.application.FrameView;
+import org.jdesktop.application.SingleFrameApplication;
 
 public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
+    
     private TCanvas tcanvas;
-    private Board board; //store current fixed grid
+    private Board board;                //store current fixed grid
     private Timer t;
-    private GameMove move; //store the keyboard action for the piece
-    private Piece piece; //store a current moving piece
+    private GameMove move;              //store the keyboard action for the piece
+    private Piece piece;                //store a current moving piece
     private Random random;
     private ActionListener performer;
-    private int score; //store the score of the game
-    private boolean automode; //if it is AI's show
-    private Player player; //computer AI agent
+    private int score;                  //store the score of the game
+    private boolean automode;           //if it is AI's show
+    private Player player;              //computer AI agent
 
     public AutoTetrisView(SingleFrameApplication app) {
         super(app);
         initComponents();
-        ResourceMap resourceMap = getResourceMap();
         JFrame mainFrame = getFrame();
         mainFrame.setTitle("Auto Tetris");
         mainFrame.setSize(TWIDTH, THEIGHT);
@@ -61,7 +53,9 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         if (automode) {
             player.genMoves(board, piece);
         }
-        performer = new ActionListener() { //Declare the methods for each timer action
+        
+        //Declare the methods for each timer action
+        performer = new ActionListener() { 
 
             public void actionPerformed(ActionEvent e) {
                 action();
@@ -71,20 +65,30 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         t.start();
     }
 
-    public final void initCanvas() { //initialize canvas
+    //initialize canvas
+    public final void initCanvas() { 
         tcanvas.setSize(TWIDTH, THEIGHT);
         tcanvas.setBackground(Color.WHITE);
         tcanvas.setStatus(GameStatus.PLAY);
         mainPanel.add(tcanvas);
     }
 
-    public final Piece initPiece() { //initialize piece
-        int type = random.nextInt(7); //generate random piece type
-        int orient = random.nextInt(O_NUM[type]); //generate random orientation according to type
-        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); //create a new instance of piece
+    //initialize piece
+    public final Piece initPiece() {
+        
+        //generate random piece type
+        int type = random.nextInt(7); 
+        
+        //generate random orientation according to type
+        int orient = random.nextInt(O_NUM[type]); 
+        
+        //create a new instance of piece
+        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient)); 
+        
         return new_piece;
     }
 
+    //initiate a new game
     public void new_game() {
         random = new Random();
         score = 0;
@@ -97,55 +101,104 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
         t.start();
     }
 
-    public void action() { //timer action
+    //timer action
+    public void action() {
+        
+        //if it is manual mode
         if (!automode) {
-            if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down
-                board.bindPiece(piece); //the piece become history
-                int pscore = board.checkFull(); //check if there is any score gained
-                if (pscore != 0) { //if there is score
-                    score += pscore; //then add score
+            
+            // if the piece cannot move down
+            if (board.check_done(piece, GameMove.DOWN)) {
+                
+                //the piece become history
+                board.bindPiece(piece); 
+                
+                //check if there is any score gained
+                int pscore = board.checkFull(); 
+                
+                //if there is score then add score
+                if (pscore != 0) { 
+                    score += pscore;
                     tcanvas.setScore(score);
                 }
-                piece = initPiece(); //initialize a new piece
+                
+                //initialize a new piece
+                piece = initPiece(); 
                 tcanvas.setPiece(piece);
-                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                
+                
+                //if the new piece can't move down
+                if (board.check_done(piece, GameMove.DOWN)) {  
                     tcanvas.setStatus(GameStatus.DEAD);
                     t.stop();
                     System.out.println("piece dead");
                 }
             }
-        } else {
+            
+        } 
+        
+        //if it is auto mode
+        else {
+            
+            //get AI agent's get the next move of the piece
             GameMove tmove = player.getMove();
+            
+            //if the piece cannot move down further
             if (board.check_done(piece, GameMove.DOWN) && tmove == null) {
-                board.bindPiece(piece); //the piece become history
-                int pscore = board.checkFull(); //check if there is any score gained
-                if (pscore != 0) { //if there is score
-                    score += pscore; //then add score
+                
+                //the piece become history
+                board.bindPiece(piece);
+                
+                //check if there is any score gained
+                int pscore = board.checkFull(); 
+                
+                //if there is score then add score
+                if (pscore != 0) { 
+                    score += pscore; 
                     tcanvas.setScore(score);
                 }
-                piece = initPiece(); //initialize a new piece
+                
+                //initialize a new piece
+                piece = initPiece(); 
                 tcanvas.setPiece(piece);
-                if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
+                
+                //if the new piece can't move down then dead
+                if (board.check_done(piece, GameMove.DOWN)) { 
                     tcanvas.setStatus(GameStatus.DEAD);
                     t.stop();
                     System.out.println("piece dead");
-                } else {
+                } 
+                
+                //otherwise let the AI agent prepare for the new piece
+                else {
                     player.genMoves(board, piece);
                 }
             }
+            
+            //if the AI agent does have any moves prepared
             if (tmove != null) {
                 piece.move(tmove, board);
             }
-            if (!board.check_done(piece, GameMove.DOWN)) { //move down as usual
+            
+            //move down as every round
+            if (!board.check_done(piece, GameMove.DOWN)) {
                 piece.move(GameMove.DOWN, board);
             }
         }
+        
+        //set move to null
         move = GameMove.NULL;
+        
+        //refresh canvas
         tcanvas.repaint();
     }
+    
 
-    public void keyPressed(KeyEvent e) { //keyboard control
-        if (!automode) { //if not automode
+    //keyboard control
+    public void keyPressed(KeyEvent e) {
+        
+        //if not automode
+        if (!automode) {
             switch (tcanvas.getStatus()) {
                 case PLAY: {
                     move = GameMove.NULL;
@@ -177,12 +230,11 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                             break;
                         case KeyEvent.VK_9:
                             automode = !automode;
-                            System.out.println("AUTOMODE!!1");
+                            System.out.println("AUTOMODE!!");
                             player.genMoves(board, piece);
                             break;
                     }
                     piece.move(move, board);
-                    //}
                     break;
                 }
                 case DEAD: {

@@ -5,12 +5,11 @@
 package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
-import autotetris.ai.FloatExample;
+import autotetris.ai.ExampleBase;
+import autotetris.ai.FuncHub;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,49 +19,39 @@ import java.util.logging.Logger;
  */
 public class booltest {
 
-    public static void main(String[] args) throws NumberFormatException{
+    public static void main(String[] args) throws NumberFormatException, InterruptedException {
 
-        final Random r = new Random();
-        Trainer train = new Trainer(0.01, 200) {
+        ExampleBase base = new ExampleBase();
 
-            @Override
-            public Example ex_gen() {
+        for (int r1 = 0; r1 < 2; r1++) {
+            for (int r2 = 0; r2 < 2; r2++) {
                 List<Double> u = new LinkedList<Double>();
                 List<Double> v = new LinkedList<Double>();
-                int r1 = r.nextInt(2);
-                int r2 = r.nextInt(2);
                 u.add((double) r1);
                 u.add((double) r2);
-                v.add((double) xor(r1, r2));
-                return new FloatExample(u, v);
+                v.add((double) FuncHub.xor(r1, r2));
+                base.insert(new Example<Double,Double>(u, v), 1.0);
             }
+        }
 
-            @Override
-            public void init_base() {
-                for (int r1 = 0; r1 < 2; r1++) {
-                    for (int r2 = 0; r2 < 2; r2++) {
-                        List<Double> u = new LinkedList<Double>();
-                        List<Double> v = new LinkedList<Double>();
-                        u.add((double) r1);
-                        u.add((double) r2);
-                        v.add((double) xor(r1, r2));
-                        base.insert(new FloatExample(u, v), 1.0);
-                    }
-                }
-            }
-        };
-        
-        train.init_base();
+        //initiate a trainer that trains to 0.01 precision with average of 200 cases
+        Trainer train = new Trainer(base, 0.001, 200);
+
+        //start training
         train.start();
         System.out.println("Training network started.");
-        try {
-            train.join();
-            System.out.println("Training network completed.\n");
-        } catch (InterruptedException ex) {
-            Logger.getLogger(booltest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
+        //wait to finish training
+        train.join();
+        System.out.println("Training network completed.\n");
+        
+        //get the trained network
         Network n = train.network();
+        
+        //for user to input to test the network
         DataInputStream cinput = new DataInputStream(System.in);
+        
+        //keeps asking user to input
         while (true) {
             try {
                 System.out.print("Please input first one or zero: ");
@@ -73,30 +62,14 @@ public class booltest {
                     List<Double> u = new LinkedList<Double>();
                     u.add((double) r1);
                     u.add((double) r2);
-                    List<Double> result = n.test(new FloatExample(u));
+                    List<Double> result = n.test(new Example<Double,Double>(u));
                     System.out.printf("The neural network output: %.2f\n", result.get(0));
                 } else {
                     System.out.println("Please input one or zero!");
                 }
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(booltest.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
-    }
-
-    public static int xor(double a, double b) {
-        if ((a == 0 && b != 0) || (b == 0 && a != 0)) {
-            return 1;
-        } else {
-            return 0;
-        }
-    }
-
-    public static int and(double a, double b) {
-        if (a != 0 && b != 0) {
-            return 1;
-        } else {
-            return 0;
         }
     }
 }

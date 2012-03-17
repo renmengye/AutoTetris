@@ -10,13 +10,30 @@ import java.util.List;
  *
  * @author rmy
  */
-public abstract class Example {
+public class Example<TI,TO> {
     
+    protected List<TI> input;
+    protected List<TO> correct;
     
+    public Example(List<TI> i, List<TO> o){
+        input=i;
+        correct=o;
+    }
     
-    public abstract List input();
+    public Example(List<TI> i){
+        input=i;
+        correct=null;
+    }
     
-    public abstract List correct();
+    public List input(){
+        return input;
+    }
     
-    public abstract String to_string();
+    public List correct(){
+        return correct;
+    }
+    
+    public String to_string(){
+        return null;
+    }
 }

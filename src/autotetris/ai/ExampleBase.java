@@ -1,6 +1,3 @@
-/*
- * A tree structure stores Examples
- */
 package autotetris.ai;
 
 /**
@@ -22,8 +19,6 @@ public class ExampleBase {
     }
 
     public ExampleNode get(double p) {
-        //ExampleNode r = head.get(p);
-        //return r.example();
         return head.get(p);
     }
 

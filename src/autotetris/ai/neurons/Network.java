@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
@@ -19,7 +15,7 @@ public class Network {
     private LinkedList<Neuron> outlay;
     private int input_size, output_size;
     private Random r;
-    
+
     //constructor with input size and output size
     public Network(int is, int os, double lr) {
 
@@ -36,10 +32,10 @@ public class Network {
         for (int j = 0; j < input_size; j++) {
             inlay.add(new SimpleInputNeuron(j));
         }
-        
+
         //initializing output neurons
         for (int j = 0; j < output_size; j++) {
-            OutputNeuron n = new OutputNeuron(j){
+            OutputNeuron n = new OutputNeuron(j) {
 
                 @Override
                 public double activ_func(double a) {
@@ -57,10 +53,11 @@ public class Network {
             outlay.add(n);
         }
 
-        connect(inlay, outlay);      //default with no hidden layer
-
+        //default with no hidden layer
+        connect(inlay, outlay);
     }
 
+    //connect two layers of neurons, s=source, t=target
     private void connect(Collection<Neuron> s, Collection<Neuron> t) {
 
         for (Neuron n : s) {
@@ -71,6 +68,7 @@ public class Network {
         }
     }
 
+    //disconnect two layers of neurons, s=source, t=target
     private void disconnect(Collection<Neuron> s, Collection<Neuron> t) {
 
         for (Neuron m : t) {
@@ -83,12 +81,17 @@ public class Network {
 
     }
 
+    //add a hidden layer with n hidden nodes
     public void add_hidden_layer(int n) {    //add n neurons to a new layer
-        LinkedList<Neuron> layer = new LinkedList<Neuron>();      //initialize a new linked list
+
+        //initialize a new linked list to store hidden neurons
+        LinkedList<Neuron> layer = new LinkedList<Neuron>();
+
+        //initialize each neuron
         for (int j = 0; j < n; j++) {
 
             //universal id as 1000, 1001, 2000....
-            Perceptron p = new Perceptron((hidlay.size()+1) * 1000 + layer.size()){
+            Perceptron p = new Perceptron((hidlay.size() + 1) * 1000 + layer.size()) {
 
                 @Override
                 public double activ_func(double a) {
@@ -106,12 +109,13 @@ public class Network {
             layer.add(p);
         }
 
-        //if this is the first hidden layer
+        //if this is the first hidden layer, then disconn in and out, conn hidden with in and out
         if (hidlay.isEmpty()) {
             disconnect(inlay, outlay);
             connect(inlay, layer);
             connect(layer, outlay);
-        } else {
+        } //if not the first hidden layer, then disconn prev hidden and out, conn hidden with prev and out
+        else {
             disconnect(hidlay.peekLast(), outlay);
             connect(hidlay.peekLast(), layer);
             connect(layer, outlay);
@@ -119,7 +123,7 @@ public class Network {
         hidlay.add(layer);
     }
 
-    public List<Double> test(Example ex) {
+    public List<Double> test(Example ex) throws InterruptedException {
 
         //input the simple input neurons with list values
         Iterator<Double> vi = ex.input().listIterator();
@@ -136,40 +140,25 @@ public class Network {
 
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.feed();
-                //System.out.println("p-started");
+                n.feed_start();
             }
 
             //wait every neuron in the layer to finish
-            try {
-                for (Neuron n : layer) {
-                    n.feed.join();
-                    //System.out.println("p-joined");
-                }
-            } catch (Exception e) {
-                //System.out.println(e);
+            for (Neuron n : layer) {
+                n.feed().join();
             }
         }
 
         //activating the output layer
         for (Neuron n : outlay) {
-            //if(!n.feed.isAlive()){
-            n.feed();
-            //}else{
-            //}
-            //System.out.println("o-started");
-            //n.calc_value();
+            n.feed_start();
         }
 
 
         //wait output layer to join back
-        try {
-            for (Neuron n : outlay) {
-                n.feed.join();
-                //System.out.println("o-joined");
-            }
-        } catch (Exception e) {
-            System.out.println(e);
+        for (Neuron n : outlay) {
+            n.feed().join();
+            //System.out.println("o-joined");
         }
 
 
@@ -183,63 +172,58 @@ public class Network {
     }
 
     //train the network with one example return the error sum
-    public double train_once(Example ex) {
-
+    public double train_once(Example ex) throws InterruptedException {
+        
+        //record the total error and return
+        double esum = 0.0;
+        
+        //run the network in feed mode
         test(ex);
-
+        
+        
+        //maybe need to fix this assumption later on, but for now it seems like all networks use double type
         Iterator<Double> ci = ex.correct().listIterator();
 
         //output layer calculate error
         for (Neuron n : outlay) {
             if (ci.hasNext()) {
-                ((OutputNeuron) n).calc_error(ci.next());
+                ((OutputNeuron) n).notify_error(ci.next());
             } else {
-                ((OutputNeuron) n).calc_error(0.0);
+                ((OutputNeuron) n).notify_error(0.0);
             }
         }
 
         //output layer update weights thread start
         for (Neuron n : outlay) {
-            //((OutputNeuron) n).update.start();
-            n.update_weight();
+            
+            //by the way collect the error
+            esum += n.error();
+            
+            n.back_start();
         }
 
         //wait all threads join
         for (Neuron n : outlay) {
-            try {
-                ((OutputNeuron) n).update();
-            } catch (Exception e) {
-                System.out.println(e);
-            }
+            n.back().join();
         }
-        
+
         //hidden layer error back prop
         //iterate in descending order (near output first
-        Iterator<LinkedList<Neuron>> li=hidlay.descendingIterator();
+        Iterator<LinkedList<Neuron>> li = hidlay.descendingIterator();
         List<Neuron> layer;
         while (li.hasNext()) {
-            
-            layer=li.next();
-            
+
+            layer = li.next();
+
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.back();
+                n.back_start();
             }
 
             //wait every neuron in the layer to finish
-            try {
-                for (Neuron n : layer) {
-                    n.back.join();
-                }
-            } catch (Exception e) {
-                System.out.println(e);
+            for (Neuron n : layer) {
+                n.back().join();
             }
-        }
-        
-        double esum=0.0;
-        
-        for(Neuron n:outlay){
-            esum+=n.error();
         }
         
         return esum;
