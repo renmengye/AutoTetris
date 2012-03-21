@@ -158,7 +158,7 @@ public class Piece implements ATCommon {
     }
 
     //counter-move action, used in recursive routing
-    public synchronized boolean revmove(GameMove move, Board board) {
+    /*public synchronized boolean revmove(GameMove move, Board board) {
         switch (move) {
             case LEFT:
                 return move(GameMove.RIGHT, board);
@@ -174,7 +174,7 @@ public class Piece implements ATCommon {
                 break;
         }
         return true;
-    }
+    }*/
 
     @Override
     public Piece clone() {

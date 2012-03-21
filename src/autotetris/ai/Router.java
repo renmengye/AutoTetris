@@ -10,8 +10,6 @@ import java.util.List;
  * @author rmy
  */
 
-
-//TODO finish annotating Router.java
 public class Router {
 
     private Board board;
@@ -23,19 +21,18 @@ public class Router {
         this.target = target;
     }
 
-    
     //a recursive method to route the piece to the desired position
     public List<GameMove> route(Piece piece, List<GameMove> moves, boolean dropped) {
 
-        
+
         //if the piece is already at desired position then return what we've got
         if (piece.getX() == target.getX() && piece.getY() == target.getY() && piece.getOrient() == target.getOrient()) { //reaches target, recursive ends
             return moves;
         }
-        
+
         //if there is still vertical distance till the target
         if (target.getY() < piece.getY()) {
-            
+
             //we need to first calculate the horizontal distance and the rotational distance
             int dx = target.getX() - piece.getX();
             int dr = target.getOrient().value() - piece.getOrient().value();
@@ -46,86 +43,75 @@ public class Router {
                     Piece test = piece.clone();
                     boolean possible_drop = true;
                     for (int i = 0; i <= j; i++) {
-                        
+
                         //regard dropping as moving piece up
                         //if the piece can be move up once more
                         if (!board.check_done(test, GameMove.UP)) {
-                            
+
                             //however the piece can't be move up once once more
-                            if (!test.revmove(GameMove.DOWN, board)) {
-                                
+                            if (!test.move(GameMove.reverse(GameMove.DOWN), board)) {
+
                                 //break the loop and indicate that the drop is impossible.
-                                possible_drop = false; 
+                                possible_drop = false;
                                 break;
                             }
                         }
                     }
-                    
+
                     //have a new list to store the test moves
                     List<GameMove> tmoves;
-                    
+
                     //if the drop is possible, then add drop action
-                    if (possible_drop && j > 0) { 
+                    if (possible_drop && j > 0) {
                         moves.add(0, GameMove.DROP);
                     }
-                    
+
                     tmoves = route(test, moves, true); //recursion occurs here
-                        
-                    
+
+
                     //if got a non empty set of moves then return
                     if (tmoves != null) {
                         return tmoves;
                     }
-                    
-                    /*else {
-                        if (!moves.isEmpty()) {
-                            moves.remove(0);
-                        }
-                    }*/
                 }
-                
-            }
-            
-            //if the object is already dropped, then search horizontally and rotationally (only one)
-            else { 
-                for (int i = 2; i <= 6; i++) { //search all possible moves in GameMove
+
+            } //if the object is already dropped, then search horizontally and rotationally (only one)
+            else {
+                //search all possible moves in GameMove
+                for (int i = 2; i <= 6; i++) {
                     GameMove move = GameMove.get(i);
                     Piece test = piece.clone();
-                    if (moves.isEmpty()) {
-                        if (!board.check_done(test, GameMove.reverse(move))) {
-                            if (test.revmove(move, board)) { //if it is a possible move
-                                moves.add(0, move);
-                                List<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                                if (tmoves != null) {
-                                    return tmoves;
-                                } else {
-                                    moves.remove(0);
-                                }
-                            }
+
+                    //if the piece can move down as game host would always do, and also can do the move
+                    //or if the piece is in the initial move then only check the reverse move
+                    if (((!moves.isEmpty() && !board.check_done(test, GameMove.UP)) || (moves.isEmpty())) && !board.check_done(test, GameMove.reverse(move))) {
+
+                        //if not initial move then move reverse of down by default
+                        if (!moves.isEmpty()) {
+                            test.move(GameMove.UP, board);
                         }
-                    } else {
-                        if (!board.check_done(test, GameMove.UP) && !board.check_done(test, GameMove.reverse(move))) {
-                            if (test.revmove(GameMove.DOWN, board) && test.revmove(move, board)) { //if it is a possible move
-                                moves.add(0, move);
-                                List<GameMove> tmoves = route(test, moves, true); //recursion occurs here
-                                if (tmoves != null) {
-                                    return tmoves;
-                                } else {
-                                    moves.remove(0);
-                                }
-                            }
+
+                        //move the designated action
+                        test.move(GameMove.reverse(move), board);
+
+                        //add the action to the list
+                        moves.add(0, move);
+
+                        //recursion occurs here
+                        List<GameMove> tmoves = route(test, moves, true);
+                        if (tmoves != null) {
+                            return tmoves;
+                        } else {
+                            moves.remove(0);
                         }
+
                     }
                 }
             }
 
         }
-        
+
         //if already at same vertical level but still not placed rightly, then give up
         return null;
     }
-
-    /*public GameMove[] getMoves() {
-        return moves;
-    }*/
 }
