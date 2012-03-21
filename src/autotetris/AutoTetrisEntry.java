@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package autotetris;
 
 /**
@@ -12,5 +8,9 @@ public class AutoTetrisEntry {
     public static void main(String[] args) {
         AutoTetrisFrame frame = new AutoTetrisFrame();
         frame.setVisible(true);
+        /*AutoTetrisCommand command=new AutoTetrisCommand();
+        for(int i=0;i<100;i++){
+            command.new_game();
+        }*/
     }
 }

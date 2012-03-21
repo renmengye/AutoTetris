@@ -62,8 +62,7 @@ public class FuncHub implements ATCommon{
 
     public static int density(Board board) {
         int sum = 0;
-        int j = 0;
-        for (j = 0; j < YNUM; j++) {
+        for (int j = 0; j < YNUM; j++) {
             sum = board.sum_line(j);
         }
         return 0;
@@ -71,9 +70,7 @@ public class FuncHub implements ATCommon{
 
     public static int tar_height(Board board) {
         int targeth = YNUM-1;
-        int j=0;
-        outer:
-        for (j = YNUM - 1; j > 0 && !board.checkEmpty(j); j--) {
+        for (int j = YNUM - 1; j > 0 && !board.checkEmpty(j); j--) {
             for (int i = 0; i < XNUM; i++) {
                 if (board.getBoard()[j][i] == 0) {
                     if (board.getBoard()[j - 1][i] == 1) {

@@ -45,7 +45,6 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
 
     @Override
     public void init() {
-        // TODO start asynchronous download of heavy resources
         board = new Board();
         random = new Random();
         move = GameMove.NULL;
@@ -96,8 +95,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
         tcanvas.setScore(score);
         t.start();
     }
-    // TODO overwrite start(), stop() and destroy() methods
-
+    
     public void action() { //timer action
         if (!automode) {
             if (board.check_done(piece, GameMove.DOWN)) { // if the piece cannot move down

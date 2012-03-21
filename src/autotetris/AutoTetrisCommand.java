@@ -70,7 +70,7 @@ public class AutoTetrisCommand implements ATCommon{
         board = new Board();
         
         //player.rater=new Rater(height,holes,target,scorec,lhole);
-        player.rater=new Rater();
+        //player.rater=new Rater();
         
         player.genMoves(board, piece);
         t.start();
@@ -79,7 +79,7 @@ public class AutoTetrisCommand implements ATCommon{
         
         if(testcount%50==0){
             System.out.printf("with lhole=%d,average score=%f\n",lhole,testsum/50.0);
-            lhole+=10;
+            //lhole+=10;
             testsum=0;
         }
         

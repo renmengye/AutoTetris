@@ -57,7 +57,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
                 action();
             }
         };
-        t = new Timer(50, performer);
+        t = new Timer(20, performer);
         t.start();
         
         this.addWindowListener(new WindowAdapter() {
@@ -187,7 +187,9 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
                     tcanvas.setStatus(GameStatus.DEAD);
                     t.stop();
                     System.out.println("piece dead");
-                } //otherwise let the AI agent prepare for the new piece
+                } 
+                
+                //otherwise let the AI agent prepare for the new piece
                 else {
                     player.genMoves(board, piece);
                 }

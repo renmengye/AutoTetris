@@ -1,13 +1,12 @@
-/*
- * This is a class that takes in board condition and piece and compute the gamemoves
- */
 package autotetris.ai;
 
 import autotetris.ATCommon;
 import autotetris.elements.Board;
 import autotetris.elements.GameMove;
 import autotetris.elements.Piece;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.ListIterator;
 
 /**
  *
@@ -15,73 +14,66 @@ import java.util.ArrayList;
  */
 public class Player implements ATCommon {
 
-    private Board board;
-    private Piece piece;
-    private Enumerator enumerator; //first enumerate
-    private Router router; // then check if it is possible to form a route
-    public Rater rater; //lastly give a rating for the circumstance
-    //private GameMove[] moves;
-    private ArrayList<GameMove> moves;
-    private static int movecount;
+    private List<GameMove> moves;           //a collection of moves
+    private ListIterator<GameMove> movei;   //a pointer to current move and prepare for next
 
-    public Player() {
-        rater = new Rater();
-    }
+    public List<GameMove> genMoves(Board board, Piece piece) {
 
-    public ArrayList<GameMove> genMoves(Board board, Piece piece) {
-        
-        this.board = board;
-        this.piece = piece;
+        //reset moves
         moves = null;
-        float max = -1000f;
         
+        //set max rating to negative infinity to ensure we have a max rating of the candidates
+        float max = -1f/0f;
+
         //a clone of test piece used to model the consequence of dropping the piece
         Piece test = piece.clone();
-        
+
         //initialize the enumerator for this orientation
-        enumerator = new Enumerator(board, test); 
+        Enumerator enumerator = new Enumerator(board, test);
         enumerator.enumerate();
-        
-        
-        Piece candidate;
-        Board maxboard = new Board();
-        Piece maxpiece = piece.clone();
-        for (candidate = enumerator.next(); candidate != null; candidate = enumerator.next()) { //if it still has next candidate
-            Board cboard = board.clone(); //have a new board to test the candidate
-            router = new Router(board, piece); //initialize the router
+
+        //if it still has next candidate, then check it out
+        for (Piece candidate = enumerator.next(); candidate != null; candidate = enumerator.next()) {
+
+            //have a new board to test the candidate
+            Board cboard = board.clone();
             cboard.bindPiece(candidate);
-            int rating = rater.rate(cboard,candidate); //give a rating for the current candidate
-            if (rating > max) { //if greater than the current max
-                ArrayList<GameMove> testm = router.route(candidate, new ArrayList<GameMove>(), false);
+            
+            //initialize the router and rater
+            Router router = new Router(board, piece);
+            Rater rater = new Rater();
+
+            //give a rating for the current candidate
+            int rating = rater.rate(cboard, candidate);
+
+            //if greater than the current max
+            if (rating > max) {
+                List<GameMove> testm = router.route(candidate, new LinkedList<GameMove>(), false);
                 if (testm != null) {
-                    maxboard=cboard.clone();
-                    maxpiece=candidate.clone();
-                    max = rating; //candidate becomes the max
-                    moves = (ArrayList<GameMove>) testm.clone(); //store the candidate's moves to return
+
+                    //candidate rating becomes the max
+                    max = rating;
+
+                    //store the candidate's moves to return
+                    moves = testm;
                 }
             }
         }
-        movecount = 0;
-        return moves != null ? moves : null; //need to check if this function returns to null
+        
+        //redefine the list pointer to the new list
+        movei = moves.listIterator();
+
+        return moves;
     }
 
+    //get the next element in the moves list
     public GameMove getMove() {
-        if (moves != null && moves.size() > movecount) {
-            if ((GameMove) moves.get(movecount) == GameMove.DOWN) {
-                movecount++;
-                return GameMove.NULL;
-            } else {
-                return (GameMove) moves.get(movecount++);
-            }
-        } else {
-            //System.out.println("it's null~~~");
-            return null;
-        }
+        return movei.hasNext() ? movei.next() : null;
     }
 
-    public void printMove(ArrayList<GameMove> x) {
-        for (int i = 0; i < x.size(); i++) {
-            System.out.println(x.get(i));
+    public void printMove() {
+        for (GameMove i : moves) {
+            System.out.println(i);
         }
     }
 }

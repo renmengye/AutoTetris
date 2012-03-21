@@ -1,7 +1,3 @@
-/*
- * Author: Mengye Ren
- * Board Class provide an instance of the grid matrix and do matrix operation
- */
 package autotetris.elements;
 
 import autotetris.ATCommon;
@@ -56,13 +52,11 @@ public class Board implements ATCommon {
                         continue inner;
                     }
                 }
-                //if (!is_piece) {
-                    if (board[j][i] == 1) {
-                        System.out.print("◼");
-                    } else {
-                        System.out.print("◻");
-                    }
-                //}
+                if (board[j][i] == 1) {
+                    System.out.print("◼");
+                } else {
+                    System.out.print("◻");
+                }
             }
             System.out.println();
         }
@@ -99,7 +93,7 @@ public class Board implements ATCommon {
     }
 
     public boolean check_done(Piece piece, GameMove move) {
-        
+
         //first a range check
         Piece test_piece = piece.clone();
         if (!test_piece.move(move, this)) {
@@ -116,7 +110,7 @@ public class Board implements ATCommon {
                 return true;
             }
         }
-        
+
         return false;
     }
 

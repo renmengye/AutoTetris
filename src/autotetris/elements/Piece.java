@@ -68,7 +68,6 @@ public class Piece implements ATCommon {
                     return false;
                 } else {
                     x--;
-                    //genBoard();
                 }
                 break;
             case RIGHT:

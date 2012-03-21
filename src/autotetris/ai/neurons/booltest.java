@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
@@ -53,21 +49,36 @@ public class booltest {
         
         //keeps asking user to input
         while (true) {
+            
             try {
+                
+                //reading input
                 System.out.print("Please input first one or zero: ");
                 int r1 = Integer.parseInt(cinput.readLine());
                 System.out.print("Please input second one or zero: ");
                 int r2 = Integer.parseInt(cinput.readLine());
+                
+                //valiidate input
                 if ((r1 == 1 || r1 == 0) && (r2 == 1 || r2 == 0)) {
+                    
+                    //construct example based on input
                     List<Double> u = new LinkedList<Double>();
                     u.add((double) r1);
                     u.add((double) r2);
                     List<Double> result = n.test(new Example<Double,Double>(u));
+                    
+                    //return result
                     System.out.printf("The neural network output: %.2f\n", result.get(0));
-                } else {
+                    
+                } 
+                //invalid input
+                else {
                     System.out.println("Please input one or zero!");
                 }
-            } catch (Exception ex) {
+            
+            } 
+            
+            catch (Exception ex) {
                 Logger.getLogger(booltest.class.getName()).log(Level.SEVERE, null, ex);
             }
         }

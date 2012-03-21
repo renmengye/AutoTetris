@@ -13,8 +13,7 @@ public class Rater implements ATCommon {
     
      public static int height_coef = -4; public static int holes_coef = -50;
      public static int density_coef = 0; public static int targeth_coef = 30;
-     public static int score_coef = 200; public static int long_hole_coef =
-     -25;
+     public static int score_coef = 200; public static int long_hole_coef =-25;
      
     public Board board;
 

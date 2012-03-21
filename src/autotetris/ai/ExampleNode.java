@@ -4,6 +4,9 @@ package autotetris.ai;
  *
  * @author rmy
  */
+
+// TODO annotate ExampleNode.java
+
 public class ExampleNode {
 
     private Example example;
@@ -101,15 +104,6 @@ public class ExampleNode {
 
     public void insert(Example ex, double p) {
         if (left != null && right != null) {
-            /*
-             * if (left.size() == 0) { ExampleNode exn = new ExampleNode(left,
-             * new ExampleNode(ex, p)); left = exn; size = left.size() +
-             * right.size(); } else if (right.size() == 0) { ExampleNode exn =
-             * new ExampleNode(right, new ExampleNode(ex, p)); right = exn; size
-             * = left.size() + right.size(); } else { min_size(left,
-             * right).insert(ex, p);
-            }
-             */
             min_size(left, right).insert(ex, p);
         } else if (left == null) {
             ExampleNode exn = new ExampleNode(ex, p);
@@ -117,10 +111,7 @@ public class ExampleNode {
             left = this.clone();
             this.example = null;
             this.size = left.size() + right.size();
-        }/*
-         * else if(right==null){ ExampleNode exn=new ExampleNode(ex,p);
-         * right=exn; size=left.size()+right.size(); }
-         */
+        }
     }
 
     @Override
