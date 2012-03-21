@@ -11,10 +11,8 @@ public class Piece implements ATCommon {
 
     private final PieceType type;
     private Orientation orient;
-    //protected byte[] range; //the maximum of left, right, top and bottom
-    public byte[][] contour; //the coordinates of each grid
-    private int x, y; //stores x and y coordinates
-    //private Board board; //stores the grid matrix of the single piece //obsolete
+    public byte[][] contour;        //the coordinates of each grid
+    private int x, y;               //stores x and y coordinates
 
     public Piece(PieceType type, Orientation orient) {
         this.type = type;
@@ -55,13 +53,14 @@ public class Piece implements ATCommon {
     public int getContour(int i, int xy) {
         return contour[i][xy];
     }
-    
+
     public void setXY(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
     //move the piece by input a GameMove object
+    //returns false if the piece cannot move
     public boolean move(GameMove move, Board board) {
         switch (move) {
             case LEFT:
@@ -129,7 +128,7 @@ public class Piece implements ATCommon {
     }
 
     //check a certain piece is in the display area
-    public boolean check_range(int x, int y) { 
+    public boolean check_range(int x, int y) {
         for (int i = 0; i <= 3; i++) {
             int dx = contour[i][CONTOUR_DX];
             int dy = contour[i][CONTOUR_DY];
@@ -141,7 +140,7 @@ public class Piece implements ATCommon {
     }
 
     //check a certain point is the display area
-    public boolean check_point_range(int x, int y) { 
+    public boolean check_point_range(int x, int y) {
         if ((y >= 0 && x >= 0) && (y < YNUM && x < XNUM)) {
             return true;
         } else {
@@ -160,7 +159,7 @@ public class Piece implements ATCommon {
     }
 
     //counter-move action, used in recursive routing
-    public boolean revmove(GameMove move, Board board) {
+    public synchronized boolean revmove(GameMove move, Board board) {
         switch (move) {
             case LEFT:
                 return move(GameMove.RIGHT, board);

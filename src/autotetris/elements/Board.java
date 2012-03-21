@@ -5,8 +5,6 @@
 package autotetris.elements;
 
 import autotetris.ATCommon;
-import autotetris.elements.Piece;
-import autotetris.elements.GameMove;
 
 public class Board implements ATCommon {
 
@@ -101,7 +99,7 @@ public class Board implements ATCommon {
     }
 
     public boolean check_done(Piece piece, GameMove move) {
-        //printBoard();
+        
         //first a range check
         Piece test_piece = piece.clone();
         if (!test_piece.move(move, this)) {
@@ -110,20 +108,15 @@ public class Board implements ATCommon {
         }
 
         //second a board check
-        //if (test_piece.check_range(test_piece.getX(), test_piece.getY())) {
         for (int i = 0; i <= 3; i++) {
             int y = test_piece.getY() + piece.getContour(i, CONTOUR_DY);
             int x = test_piece.getX() + test_piece.getContour(i, CONTOUR_DX);
-            //if(piece.check_point_range(piece.getX() + piece.getContour(i, CONTOUR_DX), piece.getY() + piece.getContour(i, CONTOUR_DY))){
             if (board[y][x] == 1) {
                 //System.out.println("checked done because occupied");
                 return true;
             }
-            //}
         }
-        //} else {
-        //return true;
-        //}
+        
         return false;
     }
 

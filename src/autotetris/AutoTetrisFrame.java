@@ -1,25 +1,20 @@
-/*
- * Author: Mengye Ren
- * Application's main frame, control centre
- */
 package autotetris;
 
 import autotetris.ai.Player;
 import autotetris.elements.*;
 import java.awt.Color;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.*;
 import java.util.Random;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.Timer;
-import org.jdesktop.application.FrameView;
-import org.jdesktop.application.SingleFrameApplication;
 
-public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
-
+/**
+ *
+ * @author rmy
+ */
+public class AutoTetrisFrame extends JFrame implements ATCommon{
+    
     private JPanel mainPanel;
     private TCanvas tcanvas;
     private Board board;                //store current fixed grid
@@ -32,26 +27,24 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     private boolean automode;           //if it is AI's show
     private Player player;              //computer AI agent
 
-    public AutoTetrisView(SingleFrameApplication app) {
-        super(app);
+    public AutoTetrisFrame() {
         //initComponents();
-        mainPanel=new JPanel();
-        JFrame mainFrame = getFrame();
-        mainFrame.setTitle("Auto Tetris");
-        mainFrame.setSize(TWIDTH, THEIGHT);
-        mainFrame.setLocation(200, 200);
-        mainFrame.setResizable(false);
-        //mainFrame.addKeyListener(this);
-        mainFrame.add(mainPanel);
+        mainPanel = new JPanel();
+        this.setTitle("Auto Tetris");
+        this.setSize(TWIDTH+20, THEIGHT+40);
+        this.setLocation(200, 200);
+        this.setResizable(false);
+        this.add(mainPanel);
+        
+        random = new Random();
+        board = new Board();
+        piece = initPiece();
         tcanvas = new TCanvas(board, piece);
         initCanvas();
-        board = new Board();
-        random = new Random();
         move = GameMove.NULL;
         score = 0;
-        piece = initPiece();
-        //automode = true;
-        automode=false;
+        automode = true;
+        //automode = false;
         player = new Player();
         if (automode) {
             player.genMoves(board, piece);
@@ -59,13 +52,37 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
 
         //Declare the methods for each timer action
         performer = new ActionListener() {
-
+            
             public void actionPerformed(ActionEvent e) {
                 action();
             }
         };
         t = new Timer(50, performer);
         t.start();
+        
+        this.addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                System.exit(0);
+            }
+        });
+        
+        
+        this.addKeyListener(new KeyListener(){
+
+            public void keyTyped(KeyEvent ke) {
+            }
+
+            public void keyPressed(KeyEvent ke) {
+                keyPress(ke);
+            }
+
+            public void keyReleased(KeyEvent ke) {
+            }
+            
+        });
+        
     }
 
     //initialize canvas
@@ -87,7 +104,7 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
 
         //create a new instance of piece
         Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient));
-
+        
         return new_piece;
     }
 
@@ -136,8 +153,10 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
                     t.stop();
                     System.out.println("piece dead");
                 }
+            } else {
+                piece.move(GameMove.DOWN, board);
             }
-
+            
         } //if it is auto mode
         else {
 
@@ -193,41 +212,41 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
     }
 
     //keyboard control
-    public void keyPressed(KeyEvent e) {
+    public void keyPress(KeyEvent e) {
 
         //if not automode
         if (!automode) {
             switch (tcanvas.getStatus()) {
                 case PLAY: {
-
+                    
                     move = GameMove.NULL;
-
+                    
                     switch (e.getKeyCode()) {
-
+                        
                         case KeyEvent.VK_LEFT:
                             move = GameMove.LEFT;
                             break;
-
+                        
                         case KeyEvent.VK_RIGHT:
                             move = GameMove.RIGHT;
                             break;
-
+                        
                         case KeyEvent.VK_DOWN:
                             move = GameMove.DROP;
                             break;
-
+                        
                         case KeyEvent.VK_SHIFT:
                             move = GameMove.CW;
                             break;
-
+                        
                         case KeyEvent.VK_UP:
                             move = GameMove.CW;
                             break;
-
+                        
                         case KeyEvent.VK_ENTER:
                             new_game();
                             break;
-
+                        
                         case KeyEvent.VK_SPACE:
                             if (t.isRunning()) {
                                 t.stop();
@@ -265,11 +284,4 @@ public class AutoTetrisView extends FrameView implements ATCommon, KeyListener {
             }
         }
     }
-
-    public void keyTyped(KeyEvent e) {
-    }
-
-    public void keyReleased(KeyEvent e) {
-    }
-
 }

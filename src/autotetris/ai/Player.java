@@ -29,13 +29,20 @@ public class Player implements ATCommon {
     }
 
     public ArrayList<GameMove> genMoves(Board board, Piece piece) {
+        
         this.board = board;
         this.piece = piece;
         moves = null;
         float max = -1000f;
+        
+        //a clone of test piece used to model the consequence of dropping the piece
         Piece test = piece.clone();
-        enumerator = new Enumerator(board, test); //initialize the enumerator for this orientation
+        
+        //initialize the enumerator for this orientation
+        enumerator = new Enumerator(board, test); 
         enumerator.enumerate();
+        
+        
         Piece candidate;
         Board maxboard = new Board();
         Piece maxpiece = piece.clone();
