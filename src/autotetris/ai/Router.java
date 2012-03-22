@@ -9,7 +9,6 @@ import java.util.List;
  *
  * @author rmy
  */
-
 public class Router {
 
     private Board board;
@@ -48,13 +47,12 @@ public class Router {
                         //if the piece can be move up once more
                         if (!board.check_done(test, GameMove.UP)) {
 
-                            //however the piece can't be move up once once more
-                            if (!test.move(GameMove.reverse(GameMove.DOWN), board)) {
+                            test.move(GameMove.reverse(GameMove.DOWN), board);
 
-                                //break the loop and indicate that the drop is impossible.
-                                possible_drop = false;
-                                break;
-                            }
+                        } //otherwise break the loop and indicate that the drop is impossible.
+                        else {
+                            possible_drop = false;
+                            break;
                         }
                     }
 
@@ -62,11 +60,14 @@ public class Router {
                     List<GameMove> tmoves;
 
                     //if the drop is possible, then add drop action
-                    if (possible_drop && j > 0) {
+                    if (possible_drop) {
                         moves.add(0, GameMove.DROP);
+                    } else {
+                        test = piece;
                     }
 
-                    tmoves = route(test, moves, true); //recursion occurs here
+                    //recursion occurs here
+                    tmoves = route(test, moves, true);
 
 
                     //if got a non empty set of moves then return
@@ -84,7 +85,9 @@ public class Router {
 
                     //if the piece can move down as game host would always do, and also can do the move
                     //or if the piece is in the initial move then only check the reverse move
-                    if (((!moves.isEmpty() && !board.check_done(test, GameMove.UP)) || (moves.isEmpty())) && !board.check_done(test, GameMove.reverse(move))) {
+                    if (((!moves.isEmpty() && !board.check_done(test, GameMove.UP))
+                            || (moves.isEmpty()))
+                            && !board.check_done(test, GameMove.reverse(move))) {
 
                         //if not initial move then move reverse of down by default
                         if (!moves.isEmpty()) {

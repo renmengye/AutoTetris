@@ -115,7 +115,9 @@ public class Piece implements ATCommon {
                 if (board.check_done(this, GameMove.DOWN)) {
                     return false;
                 } else {
-                    do { //if drop, moving down until done
+                    
+                    //if drop, moving down until done
+                    do { 
                         this.move(GameMove.DOWN, board);
                     } while (!board.check_done(this, GameMove.DOWN));
                 }
@@ -156,25 +158,6 @@ public class Piece implements ATCommon {
         }
         return true;
     }
-
-    //counter-move action, used in recursive routing
-    /*public synchronized boolean revmove(GameMove move, Board board) {
-        switch (move) {
-            case LEFT:
-                return move(GameMove.RIGHT, board);
-            case RIGHT:
-                return move(GameMove.LEFT, board);
-            case DOWN:
-                return move(GameMove.UP, board);
-            case CW:
-                return move(GameMove.CCW, board);
-            case CCW:
-                return move(GameMove.CW, board);
-            case NULL:
-                break;
-        }
-        return true;
-    }*/
 
     @Override
     public Piece clone() {
