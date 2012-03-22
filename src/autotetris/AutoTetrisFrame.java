@@ -17,47 +17,45 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
     
     private JPanel mainPanel;
     private TCanvas tcanvas;
-    private Board board;                //store current fixed grid
     private Timer t;
     private GameMove move;              //store the keyboard action for the piece
-    private Piece piece;                //store a current moving piece
-    private Random random;
-    private ActionListener performer;
-    private int score;                  //store the score of the game
     private boolean automode;           //if it is AI's show
     private Player player;              //computer AI agent
+    private GameHost host;
 
     public AutoTetrisFrame() {
-        //initComponents();
-        mainPanel = new JPanel();
+        
         this.setTitle("Auto Tetris");
         this.setSize(TWIDTH+20, THEIGHT+40);
         this.setLocation(200, 200);
         this.setResizable(false);
+        
+        
+        mainPanel = new JPanel();
         this.add(mainPanel);
         
-        random = new Random();
-        board = new Board();
-        piece = initPiece();
-        tcanvas = new TCanvas(board, piece);
+        
+        host = new GameHost();
+        
+        
+        player = new Player(host);
+        
+        tcanvas = new TCanvas(host.getBoard(), host.getPiece());
         initCanvas();
+        
+        
         move = GameMove.NULL;
-        score = 0;
         automode = true;
         //automode = false;
-        player = new Player();
-        if (automode) {
-            player.genMoves(board, piece);
-        }
 
-        //Declare the methods for each timer action
-        performer = new ActionListener() {
+        t = new Timer(20, new ActionListener() {
             
             public void actionPerformed(ActionEvent e) {
-                action();
+                tcanvas.setBoard(host.getBoard());
+                tcanvas.setPiece(host.getPiece());
+                tcanvas.repaint();
             }
-        };
-        t = new Timer(20, performer);
+        });
         t.start();
         
         this.addWindowListener(new WindowAdapter() {
@@ -86,43 +84,16 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
     }
 
     //initialize canvas
-    public final void initCanvas() {
+    private void initCanvas() {
         tcanvas.setSize(TWIDTH, THEIGHT);
         tcanvas.setBackground(Color.WHITE);
         tcanvas.setStatus(GameStatus.PLAY);
         mainPanel.add(tcanvas);
     }
 
-    //initialize piece
-    public final Piece initPiece() {
-
-        //generate random piece type
-        int type = random.nextInt(7);
-
-        //generate random orientation according to type
-        int orient = random.nextInt(O_NUM[type]);
-
-        //create a new instance of piece
-        Piece new_piece = new Piece(PieceType.get(type), Orientation.get(orient));
-        
-        return new_piece;
-    }
-
-    //initiate a new game
-    public void new_game() {
-        random = new Random();
-        score = 0;
-        initPiece();
-        board = new Board();
-        tcanvas.setBoard(board);
-        tcanvas.setPiece(piece);
-        tcanvas.setScore(score);
-        player.genMoves(board, piece);
-        t.start();
-    }
-
+    
     //timer action
-    public void action() {
+    /*public void action() {
 
         //if it is manual mode
         if (!automode) {
@@ -211,7 +182,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
 
         //refresh canvas
         tcanvas.repaint();
-    }
+    }*/
 
     //keyboard control
     public void keyPress(KeyEvent e) {
@@ -246,7 +217,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
                             break;
                         
                         case KeyEvent.VK_ENTER:
-                            new_game();
+                            host.new_game();
                             break;
                         
                         case KeyEvent.VK_SPACE:
@@ -259,16 +230,16 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
                         case KeyEvent.VK_9:
                             automode = !automode;
                             System.out.println("AUTOMODE!!");
-                            player.genMoves(board, piece);
+                            //player.genMoves(board, piece);
                             break;
                     }
-                    piece.move(move, board);
+                    //piece.move(move, board);
                     break;
                 }
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            new_game();
+                            //new_game();
                             break;
                     }
                 }
@@ -281,7 +252,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon{
                     automode = !automode;
                     break;
                 case KeyEvent.VK_ENTER:
-                    new_game();
+                    //new_game();
                     break;
             }
         }

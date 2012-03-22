@@ -92,9 +92,9 @@ public class Board implements ATCommon {
         return r;
     }
 
+    //check if the piece location is occupied
     public boolean check_done(Piece piece, GameMove move) {
 
-        //first a range check
         Piece test_piece = piece.clone();
         if (!test_piece.move(move, this)) {
             //System.out.println("checked done because can't move");
@@ -103,7 +103,7 @@ public class Board implements ATCommon {
 
         //second a board check
         for (int i = 0; i <= 3; i++) {
-            int y = test_piece.getY() + piece.getContour(i, CONTOUR_DY);
+            int y = test_piece.getY() + test_piece.getContour(i, CONTOUR_DY);
             int x = test_piece.getX() + test_piece.getContour(i, CONTOUR_DX);
             if (board[y][x] == 1) {
                 //System.out.println("checked done because occupied");
