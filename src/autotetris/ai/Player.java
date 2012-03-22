@@ -17,15 +17,21 @@ public class Player extends Thread{
     private List<GameMove> moves;           //a collection of moves
     private ListIterator<GameMove> movei;   //a pointer to current move and prepare for next
     private GameHost host;
+    private Board board;
+    private Piece piece;
+
+    private Piece maximal;
     
     public Player(GameHost host){
         this.host=host;
+        this.board=host.getBoard().clone();
+        this.piece=host.getPiece().clone();
     }
+
     public Player(){
     }
 
-    public List<GameMove> genMoves(Board board, Piece piece) {
-
+    public Piece gen_max(){
         //reset moves
         moves = null;
 
@@ -34,6 +40,7 @@ public class Player extends Thread{
 
         //a clone of test piece used to model the consequence of dropping the piece
         Piece test = piece.clone();
+
 
         //initialize the enumerator for this orientation
         Enumerator enumerator = new Enumerator(board, test);
@@ -55,8 +62,11 @@ public class Player extends Thread{
 
             //if greater than the current max
             if (rating > max) {
-                List<GameMove> testm = router.route(candidate, new LinkedList<GameMove>(), false);
+                List<GameMove> testm = router.possible_route(candidate, new LinkedList<GameMove>(), false);
                 if (testm != null) {
+
+                    //store max piece
+                    maximal = candidate;
 
                     //candidate rating becomes the max
                     max = rating;
@@ -72,8 +82,9 @@ public class Player extends Thread{
             movei = moves.listIterator();
         }
 
-        return moves;
+        return maximal;
     }
+
 
     //get the next element in the moves list
     public GameMove getMove() {
@@ -93,6 +104,18 @@ public class Player extends Thread{
     
     @Override
     public void run(){
-        
+        while(true){
+
+        }
     }
+
+    public boolean compare_piece(){
+        return true;
+    }
+
+    public boolean compare_board(){
+        return true;
+    }
+
+
 }

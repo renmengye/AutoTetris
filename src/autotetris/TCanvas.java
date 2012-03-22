@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package autotetris;
 
 import autotetris.elements.Board;
@@ -54,7 +50,7 @@ public class TCanvas extends Canvas implements ATCommon {
         g.drawRect(1, 1, TWIDTH-2, THEIGHT-2);
         
         //draw the board
-        byte[][] grid = board.getBoard();
+        byte[][] grid = board.toArray();
         
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {

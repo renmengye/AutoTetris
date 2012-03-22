@@ -4,7 +4,6 @@
  */
 package autotetris;
 
-import autotetris.ai.Rater;
 import autotetris.ai.Player;
 import autotetris.elements.Board;
 import autotetris.elements.PieceType;
@@ -15,11 +14,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 import javax.swing.Timer;
+
 /**
  *
  * @author rmy
  */
-public class AutoTetrisCommand implements ATCommon{
+public class AutoTetrisCommand implements ATCommon {
+
     private Board board; //store current fixed grid
     public Timer t;
     private GameMove move; //store the keyboard action for the piece
@@ -29,22 +30,20 @@ public class AutoTetrisCommand implements ATCommon{
     private int score; //store the score of the game
     private boolean automode; //if it is AI's show
     private Player player; //computer AI agent
-    
-    
-    static int height=-4;
-    static int holes=-70;
-    static int target=30;
-    static int scorec=8000;
-    static int lhole=-25;
-    
-    static int testcount=0;
-    static long testsum=0;
+    static int height = -4;
+    static int holes = -70;
+    static int target = 30;
+    static int scorec = 8000;
+    static int lhole = -25;
+    static int testcount = 0;
+    static long testsum = 0;
 
     public AutoTetrisCommand() {
         move = GameMove.NULL;
         automode = true;
         player = new Player();
         performer = new ActionListener() { //Declare the methods for each timer action
+
             public void actionPerformed(ActionEvent e) {
                 action();
             }
@@ -60,33 +59,33 @@ public class AutoTetrisCommand implements ATCommon{
     }
 
     public void new_game() {
-        
+
         random = new Random();
-        
-        testsum+=score;
-        
+
+        testsum += score;
+
         score = 0;
-        piece=initPiece();
+        piece = initPiece();
         board = new Board();
-        
+
         //player.rater=new Rater(height,holes,target,scorec,lhole);
         //player.rater=new Rater();
-        
-        player.genMoves(board, piece);
+
+        //player.genMoves(board, piece);
         t.start();
-        
+
         testcount++;
-        
-        if(testcount%50==0){
-            System.out.printf("with lhole=%d,average score=%f\n",lhole,testsum/50.0);
+
+        if (testcount % 50 == 0) {
+            System.out.printf("with lhole=%d,average score=%f\n", lhole, testsum / 50.0);
             //lhole+=10;
-            testsum=0;
+            testsum = 0;
         }
-        
-        if(testcount%500==0){
+
+        if (testcount % 500 == 0) {
             System.exit(0);
         }
-        
+
     }
 
     public void action() { //timer action
@@ -100,7 +99,7 @@ public class AutoTetrisCommand implements ATCommon{
                 piece = initPiece(); //initialize a new piece
                 if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
                     t.stop();
-                    System.out.printf("piece dead. final score: %d\n",score);
+                    System.out.printf("piece dead. final score: %d\n", score);
                     new_game();
                 }
             }
@@ -115,10 +114,10 @@ public class AutoTetrisCommand implements ATCommon{
                 piece = initPiece(); //initialize a new piece
                 if (board.check_done(piece, GameMove.DOWN)) { //if the new piece can't move down
                     t.stop();
-                    System.out.printf("piece dead. final score: %d\n",score);
+                    System.out.printf("piece dead. final score: %d\n", score);
                     new_game();
                 } else {
-                    player.genMoves(board, piece);
+                    //player.genMoves(board, piece);
                 }
             }
             if (tmove != null) {

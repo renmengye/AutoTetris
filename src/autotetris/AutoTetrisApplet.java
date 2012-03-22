@@ -16,8 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.Random;
 import javax.swing.Timer;
 import javax.swing.JApplet;
@@ -54,7 +52,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
         automode = true;
         player = new Player();
         if (automode) {
-            player.genMoves(board, piece);
+            //player.genMoves(board, piece);
         }
         initCanvas();
         performer = new ActionListener() { //Declare the methods for each timer action
@@ -89,7 +87,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
         score = 0;
         initPiece();
         board = new Board();
-        player.genMoves(board, piece);
+        //player.genMoves(board, piece);
         tcanvas.setBoard(board);
         tcanvas.setPiece(piece);
         tcanvas.setScore(score);
@@ -129,7 +127,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
                     t.stop();
                     System.out.println("piece dead");
                 } else {
-                    player.genMoves(board, piece);
+                    //player.genMoves(board, piece);
                 }
             }
             if (tmove != null) {
@@ -177,7 +175,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
                         case KeyEvent.VK_9:
                             automode = !automode;
                             System.out.println("AUTOMODE!!1");
-                            player.genMoves(board, piece);
+                            //player.genMoves(board, piece);
                             break;
                     }
                     //if (!board.check_done(piece, move)) {

@@ -21,7 +21,7 @@ public class Board implements ATCommon {
     }
 
     //return a matrix of grids
-    public byte[][] getBoard() {
+    public byte[][] toArray() {
         return board;
     }
 
@@ -142,6 +142,7 @@ public class Board implements ATCommon {
         return true;
     }
 
+    /*
     public boolean check4(int line) {
         int count = 0;
         for (int i = 0; i < XNUM; i++) {
@@ -154,7 +155,7 @@ public class Board implements ATCommon {
         }
 
         return false;
-    }
+    }*/
 
     public float density(int line) {
         int count = 0;
