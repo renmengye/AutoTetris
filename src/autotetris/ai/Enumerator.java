@@ -55,14 +55,8 @@ public class Enumerator implements ATCommon {
         iterator=candidates.listIterator();
     }
 
-    public Piece next() { //pops out the next candidate in the list
-        /*if (candidates.size() > 0) {
-            Piece next = (Piece) candidates.get(0);
-            candidates.remove(0);
-            return next;
-        } else {
-            return null;
-        }*/
+    //pops out the next candidate in the list
+    public Piece next() { 
         if(iterator.hasNext()){
             return iterator.next();
         }else{
@@ -70,7 +64,8 @@ public class Enumerator implements ATCommon {
         }
     }
 
-    private boolean occupy_check(Piece piece, int x, int y) { //check if the board position is occupied
+    //check if the board position is occupied
+    private boolean occupy_check(Piece piece, int x, int y) { 
         for (int k = 0; k <= 3; k++) {
             int dx = piece.contour[k][0];
             int dy = piece.contour[k][1];

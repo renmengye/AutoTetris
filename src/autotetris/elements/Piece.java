@@ -61,7 +61,7 @@ public class Piece implements ATCommon {
 
     //move the piece by input a GameMove object
     //returns false if the piece cannot move
-    public boolean move(GameMove move, Board board) {
+    public synchronized boolean move(GameMove move, Board board) {
         switch (move) {
             case LEFT:
                 if (!check_range(x - 1, y)) {
@@ -162,5 +162,9 @@ public class Piece implements ATCommon {
     @Override
     public Piece clone() {
         return new Piece(type, orient, x, y);
+    }
+
+    public boolean equals(Piece x){
+        return this.getX()==x.getX() && this.getY()==x.getY() && this.getOrient()==x.getOrient();
     }
 }

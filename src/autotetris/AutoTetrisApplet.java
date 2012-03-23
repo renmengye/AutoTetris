@@ -50,7 +50,7 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
         piece = initPiece();
         tcanvas = new TCanvas(board, piece);
         automode = true;
-        player = new Player();
+        player = new Player(null,50);
         if (automode) {
             //player.genMoves(board, piece);
         }

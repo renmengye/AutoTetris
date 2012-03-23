@@ -4,7 +4,10 @@ import autotetris.elements.Board;
 import autotetris.elements.GameStatus;
 import autotetris.elements.Piece;
 import java.awt.Canvas;
+import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.Image;
 
 /**
  *
@@ -21,6 +24,11 @@ public class TCanvas extends Canvas implements ATCommon {
         this.board = board;
         this.state = GameStatus.PLAY;
         this.piece = piece;
+
+
+        setSize(TWIDTH, THEIGHT);
+        setBackground(Color.WHITE);
+        
     }
 
     public void setBoard(Board board) {
@@ -30,8 +38,8 @@ public class TCanvas extends Canvas implements ATCommon {
     public void setStatus(GameStatus state) {
         this.state = state;
     }
-    
-    public GameStatus getStatus(){
+
+    public GameStatus getStatus() {
         return state;
     }
 
@@ -39,19 +47,19 @@ public class TCanvas extends Canvas implements ATCommon {
         this.piece = piece;
     }
 
-    public void setScore(int score){
+    public void setScore(int score) {
         this.score = score;
     }
 
     @Override
     public void paint(Graphics g) {
-        
+
         //draw the frame
-        g.drawRect(1, 1, TWIDTH-2, THEIGHT-2);
-        
+        g.drawRect(1, 1, TWIDTH - 2, THEIGHT - 2);
+
         //draw the board
         byte[][] grid = board.toArray();
-        
+
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
                 if (grid[j][i] == 1) {
@@ -59,15 +67,36 @@ public class TCanvas extends Canvas implements ATCommon {
                 }
             }
         }
-        
+
         //draw the piece
-        for (int i=0;i<=3;i++){
-            int x=piece.getX()+piece.getContour(i, CONTOUR_DX);
-            int y=piece.getY()+piece.getContour(i,CONTOUR_DY);
+        for (int i = 0; i <= 3; i++) {
+            int x = piece.getX() + piece.getContour(i, CONTOUR_DX);
+            int y = piece.getY() + piece.getContour(i, CONTOUR_DY);
             g.fillRect(x * (XDIM + GAP) + GAP, y * (YDIM + GAP) + GAP, XDIM, YDIM);
         }
-        
         //draw the score
-        g.drawString("SCORE: "+score, TWIDTH-80, GAP+10);
+        g.drawString("SCORE: " + score, TWIDTH - 80, GAP + 10);
+
+        //g.drawImage(offscreen, 0, 0, this);
+    }
+
+    //double buffer
+    @Override
+    public void update(Graphics g){
+        Graphics offgc;
+	Image offscreen = null;
+	Dimension d = this.getSize();
+
+	// create the offscreen buffer and associated Graphics
+	offscreen = createImage(d.width, d.height);
+	offgc = offscreen.getGraphics();
+	// clear the exposed area
+	offgc.setColor(getBackground());
+	offgc.fillRect(0, 0, d.width, d.height);
+	offgc.setColor(getForeground());
+	// do normal redraw
+	paint(offgc);
+	// transfer offscreen to window
+	g.drawImage(offscreen, 0, 0, this);
     }
 }

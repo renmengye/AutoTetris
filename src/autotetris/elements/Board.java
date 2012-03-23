@@ -142,21 +142,6 @@ public class Board implements ATCommon {
         return true;
     }
 
-    /*
-    public boolean check4(int line) {
-        int count = 0;
-        for (int i = 0; i < XNUM; i++) {
-            if (board[line][i] == 1) {
-                count++;
-                if (count == 4) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }*/
-
     public float density(int line) {
         int count = 0;
         for (int j = YNUM - 1; j >= line; j--) {
@@ -186,5 +171,16 @@ public class Board implements ATCommon {
             }
         }
         return new Board(x);
+    }
+
+    public boolean equals(Board x){
+        for(int j=YNUM-1;j>=0;j--){
+            for(int i=0;i<XNUM;i++){
+                if(x.toArray()[j][i]!=board[j][i]){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

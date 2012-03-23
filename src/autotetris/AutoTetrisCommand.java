@@ -41,7 +41,7 @@ public class AutoTetrisCommand implements ATCommon {
     public AutoTetrisCommand() {
         move = GameMove.NULL;
         automode = true;
-        player = new Player();
+        player = new Player(null,50);
         performer = new ActionListener() { //Declare the methods for each timer action
 
             public void actionPerformed(ActionEvent e) {

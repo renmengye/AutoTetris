@@ -7,31 +7,34 @@ import autotetris.elements.Piece;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author rmy
  */
-public class Player extends Thread{
+public class Player extends Thread {
 
     private List<GameMove> moves;           //a collection of moves
     private ListIterator<GameMove> movei;   //a pointer to current move and prepare for next
     private GameHost host;
     private Board board;
     private Piece piece;
+    private Piece target;
+    private boolean update;
+    private int reaction;
 
-    private Piece maximal;
-    
-    public Player(GameHost host){
-        this.host=host;
-        this.board=host.getBoard().clone();
-        this.piece=host.getPiece().clone();
+    public Player(GameHost host, int reaction) {
+        this.host = host;
+        this.board = host.getBoard();
+        this.piece = host.getPiece();
+        this.reaction=reaction;
+        update = false;
+        gen_target();
     }
 
-    public Player(){
-    }
-
-    public Piece gen_max(){
+    private void gen_target() {
         //reset moves
         moves = null;
 
@@ -54,7 +57,7 @@ public class Player extends Thread{
             cboard.bindPiece(candidate);
 
             //initialize the router and rater
-            Router router = new Router(board, piece);
+            Router router = new Router(board, piece, candidate);
             Rater rater = new Rater();
 
             //give a rating for the current candidate
@@ -62,29 +65,20 @@ public class Player extends Thread{
 
             //if greater than the current max
             if (rating > max) {
-                List<GameMove> testm = router.possible_route(candidate, new LinkedList<GameMove>(), false);
-                if (testm != null) {
+                if(router.possible_route()){
 
                     //store max piece
-                    maximal = candidate;
+                    target = candidate;
 
                     //candidate rating becomes the max
                     max = rating;
 
                     //store the candidate's moves to return
-                    moves = testm;
+                    //moves = testm;
                 }
             }
         }
-
-        //redefine the list pointer to the new list
-        if (moves != null) {
-            movei = moves.listIterator();
-        }
-
-        return maximal;
     }
-
 
     //get the next element in the moves list
     public GameMove getMove() {
@@ -100,22 +94,34 @@ public class Player extends Thread{
             System.out.println(i);
         }
     }
-    
-    
-    @Override
-    public void run(){
-        while(true){
 
+    public synchronized void update() {
+        update = true;
+    }
+
+    public void end_game() {
+        this.stop();
+    }
+
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                if (update) {
+                    board = host.getBoard();
+                    piece = host.getPiece();
+                    gen_target();
+                    update = false;
+                } else {
+                    //if (!board.check_done(piece, GameMove.NULL)) {
+                        Router router = new Router(board, piece, target);
+                        piece.move(router.next(), board);
+                    //}
+                }
+                sleep(100);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }
-
-    public boolean compare_piece(){
-        return true;
-    }
-
-    public boolean compare_board(){
-        return true;
-    }
-
-
 }

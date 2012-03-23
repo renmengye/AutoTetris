@@ -1,37 +1,43 @@
 package autotetris.elements;
 
 import autotetris.ATCommon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import autotetris.ai.Player;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.Timer;
 
 /**
  *
  * @author rmy
  */
-public class GameHost implements ATCommon{
+public class GameHost extends Thread implements ATCommon {
 
     private Board board;
     private Piece piece;
     private Random random;
     private int score;
-    private Timer timer;
+    private Player player;
+    private int reaction;
 
-    public GameHost()  {
+    public GameHost(int reaction) {
         board = new Board();
         random = new Random();
-        
         piece = initPiece();
-        
-        timer = new Timer(100, new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                timer_action();
-            }
-        });
         score = 0;
-        timer.start();
+        this.reaction=reaction;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
+    }
+
+    @Override
+    public void start() {
+        super.start();
+        if (player != null) {
+            player.start();
+        }
     }
 
     public Board getBoard() {
@@ -67,31 +73,39 @@ public class GameHost implements ATCommon{
         score = 0;
         initPiece();
         board = new Board();
-        timer.start();
     }
 
-    private void timer_action() {
-        if (board.check_done(piece, GameMove.DOWN)) {
-
-            //the piece become history
-            board.bindPiece(piece);
-
-            //check if there is any score gained
-            score += board.checkFull();
-
-            //initialize a new piece
-            piece = initPiece();
-            //tcanvas.setPiece(piece);
-
-
-            //if the new piece can't move down
-            if (board.check_done(piece, GameMove.DOWN)) {
-                //tcanvas.setStatus(GameStatus.DEAD);
-                timer.stop();
-                //System.out.println("piece dead");
+    @Override
+    public void run() {
+        while (true) {
+            try {
+                if (board.check_done(piece, GameMove.DOWN)) {
+                    //the piece become history
+                    board.bindPiece(piece);
+                    //check if there is any score gained
+                    score += board.checkFull();
+                    //initialize a new piece
+                    piece = initPiece();
+                    //tcanvas.setPiece(piece);
+                    if (player != null) {
+                        player.update();
+                    }
+                    if (board.check_done(piece, GameMove.DOWN)) {
+                        //tcanvas.setStatus(GameStatus.DEAD);
+                        //this.wait();
+                        if (player != null) {
+                            player.end_game();
+                        }
+                        break;
+                        //System.out.println("piece dead");
+                    }
+                } else {
+                    piece.move(GameMove.DOWN, board);
+                }
+                sleep(reaction);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GameHost.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else {
-            piece.move(GameMove.DOWN, board);
         }
     }
 }
