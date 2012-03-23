@@ -65,8 +65,8 @@ public class Player extends Thread {
 
             //if greater than the current max
             if (rating > max) {
-                if(router.possible_route()){
-
+                //if(router.possible_route(candidate,false)){
+if(router.possible_route()){
                     //store max piece
                     target = candidate;
 
@@ -75,6 +75,9 @@ public class Player extends Thread {
 
                     //store the candidate's moves to return
                     //moves = testm;
+                }
+                else{
+                    System.out.println("not possible");
                 }
             }
         }

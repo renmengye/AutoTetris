@@ -22,7 +22,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
     private Player player;              //computer AI agent
     private GameHost host;
     private static int player_react = 0;
-    private static int host_react = 50;
+    private static int host_react = 200;
 
     public AutoTetrisFrame() {
 
