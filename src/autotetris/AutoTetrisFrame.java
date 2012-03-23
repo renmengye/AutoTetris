@@ -21,8 +21,8 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
     private boolean automode;           //if it is AI's show
     private Player player;              //computer AI agent
     private GameHost host;
-    private static int player_react = 10;
-    private static int host_react = 20;
+    private int player_react = 60;
+    private int host_react = 200;
 
     public AutoTetrisFrame() {
 
@@ -43,7 +43,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
         automode = true;
         //automode = false;
 
-        t = new Timer(5, new ActionListener() {
+        t = new Timer(50, new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 tcanvas.setBoard(host.getBoard());
@@ -146,6 +146,29 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
                 case KeyEvent.VK_ENTER:
                     new_game();
                     break;
+                case KeyEvent.VK_UP:
+                    if (host_react - 10 > player_react) {
+                        host_react -= 10;
+                        host.setReact(host_react);
+                    }
+                    break;
+                case KeyEvent.VK_DOWN:
+                    if (host_react + 10 < 500) {
+                        host_react += 10;
+                        host.setReact(host_react);
+                    }
+                    break;
+                case KeyEvent.VK_LEFT:
+                    if (player_react + 5 < host_react) {
+                        player_react += 5;
+                    }
+                    player.setReact(player_react);
+                    break;
+                case KeyEvent.VK_RIGHT:
+                    if (player_react > 5) {
+                        player_react -= 5;
+                        player.setReact(player_react);
+                    }
             }
         }
     }

@@ -51,6 +51,10 @@ public class GameHost extends Thread implements ATCommon {
     public int getScore() {
         return score;
     }
+    
+    public void setReact(int reaction){
+        this.reaction=reaction;
+    }
 
     //initialize piece
     private Piece initPiece() {

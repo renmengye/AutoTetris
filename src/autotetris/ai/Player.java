@@ -33,6 +33,10 @@ public class Player extends Thread {
         setPriority(MAX_PRIORITY);
         gen_target();
     }
+    
+    public void setReact(int reaction){
+        this.reaction=reaction;
+    }
 
     private void gen_target() {
         //reset moves
