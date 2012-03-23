@@ -1,8 +1,8 @@
 package autotetris;
 
 import autotetris.ai.Player;
-import autotetris.elements.*;
-import java.awt.Color;
+import autotetris.elements.GameHost;
+import autotetris.elements.GameMove;
 import java.awt.event.*;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -21,8 +21,8 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
     private boolean automode;           //if it is AI's show
     private Player player;              //computer AI agent
     private GameHost host;
-    private static int player_react = 0;
-    private static int host_react = 200;
+    private static int player_react = 10;
+    private static int host_react = 20;
 
     public AutoTetrisFrame() {
 
@@ -34,13 +34,6 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
         mainPanel = new JPanel();
         this.add(mainPanel);
 
-
-        /*host = new GameHost(host_react);
-
-
-        player = new Player(host, player_react);
-
-        host.setPlayer(player);*/
         new_game();
 
         tcanvas = new TCanvas(host.getBoard(), host.getPiece());

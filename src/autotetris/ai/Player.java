@@ -4,7 +4,6 @@ import autotetris.elements.Board;
 import autotetris.elements.GameHost;
 import autotetris.elements.GameMove;
 import autotetris.elements.Piece;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.logging.Level;
@@ -29,8 +28,9 @@ public class Player extends Thread {
         this.host = host;
         this.board = host.getBoard();
         this.piece = host.getPiece();
-        this.reaction=reaction;
+        this.reaction = reaction;
         update = false;
+        setPriority(MAX_PRIORITY);
         gen_target();
     }
 
@@ -66,7 +66,7 @@ public class Player extends Thread {
             //if greater than the current max
             if (rating > max) {
                 //if(router.possible_route(candidate,false)){
-if(router.possible_route()){
+                if (router.possible_route()) {
                     //store max piece
                     target = candidate;
 
@@ -75,9 +75,6 @@ if(router.possible_route()){
 
                     //store the candidate's moves to return
                     //moves = testm;
-                }
-                else{
-                    System.out.println("not possible");
                 }
             }
         }
@@ -117,11 +114,11 @@ if(router.possible_route()){
                     update = false;
                 } else {
                     //if (!board.check_done(piece, GameMove.NULL)) {
-                        Router router = new Router(board, piece, target);
-                        piece.move(router.next(), board);
+                    Router router = new Router(board, piece, target);
+                    piece.move(router.next(), board);
                     //}
                 }
-                sleep(100);
+                sleep(reaction);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);
             }

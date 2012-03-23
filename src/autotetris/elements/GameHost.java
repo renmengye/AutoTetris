@@ -5,7 +5,6 @@ import autotetris.ai.Player;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.Timer;
 
 /**
  *
@@ -26,6 +25,7 @@ public class GameHost extends Thread implements ATCommon {
         piece = initPiece();
         score = 0;
         this.reaction=reaction;
+        setPriority(MIN_PRIORITY);
     }
 
     public void setPlayer(Player player) {

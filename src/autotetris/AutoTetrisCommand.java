@@ -5,11 +5,7 @@
 package autotetris;
 
 import autotetris.ai.Player;
-import autotetris.elements.Board;
-import autotetris.elements.PieceType;
-import autotetris.elements.Piece;
-import autotetris.elements.GameMove;
-import autotetris.elements.Orientation;
+import autotetris.elements.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
