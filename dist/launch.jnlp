@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<jnlp codebase="http://rmy.zapto.org/autotetris/" href="launch.jnlp" spec="1.0+">
+    <information>
+        <title>AutoTetris</title>
+        <vendor>Mengye Ren</vendor>
+        <homepage href=""/>
+        <description>An automatic solution to a classic game Tetris</description>
+        <description kind="short">AutoTetris</description>
+        
+        
+    </information>
+    <update check="always"/>
+    <security>
+<all-permissions/>
+</security>
+    <resources>
+        <j2se java-vm-args="-Xmx2g -Xms1g -Djava.security.policy=applet.policy" version="1.5+"/>
+        <jar href="AutoTetris.jar" main="true"/>
+        
+        
+    <jar href="lib/appframework-1.0.3.jar"/>
+<jar href="lib/swing-worker-1.1.jar"/>
+<jar href="lib/swing-layout-1.0.4.jar"/>
+</resources>
+    <application-desc main-class="autotetris.AutoTetrisEntry">
+        
+    </application-desc>
+</jnlp>
