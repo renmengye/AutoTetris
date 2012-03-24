@@ -21,7 +21,7 @@ public class Player extends Thread {
     private Board board;
     private Piece piece;
     private Piece target;
-    private boolean update;
+    private boolean update_piece;
     private int reaction;
 
     public Player(GameHost host, int reaction) {
@@ -29,7 +29,7 @@ public class Player extends Thread {
         this.board = host.getBoard();
         this.piece = host.getPiece();
         this.reaction = reaction;
-        update = false;
+        update_piece = false;
         setPriority(MAX_PRIORITY);
         gen_target();
     }
@@ -83,24 +83,9 @@ public class Player extends Thread {
             }
         }
     }
-
-    //get the next element in the moves list
-    public GameMove getMove() {
-        if (moves != null) {
-            return movei.hasNext() ? movei.next() : null;
-        } else {
-            return null;
-        }
-    }
-
-    public void printMove() {
-        for (GameMove i : moves) {
-            System.out.println(i);
-        }
-    }
-
-    public synchronized void update() {
-        update = true;
+    
+    public void update() {
+        update_piece = true;
     }
 
     public void end_game() {
@@ -111,17 +96,16 @@ public class Player extends Thread {
     public void run() {
         while (true) {
             try {
-                if (update) {
-                    board = host.getBoard();
+                if (update_piece) {
                     piece = host.getPiece();
                     gen_target();
-                    update = false;
-                } else {
-                    //if (!board.check_done(piece, GameMove.NULL)) {
+                    update_piece = false;
+                } 
+                
+                //else {
                     Router router = new Router(board, piece, target);
                     piece.move(router.next(), board);
-                    //}
-                }
+                //}
                 sleep(reaction);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Player.class.getName()).log(Level.SEVERE, null, ex);

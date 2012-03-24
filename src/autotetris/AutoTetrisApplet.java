@@ -112,7 +112,8 @@ public class AutoTetrisApplet extends JApplet implements ATCommon, KeyListener {
                 }
             }
         } else {
-            GameMove tmove = player.getMove();
+            //GameMove tmove = player.getMove();
+            GameMove tmove=null;
             if (board.check_done(piece, GameMove.DOWN) && tmove == null) {
                 board.bindPiece(piece); //the piece become history
                 int pscore = board.checkFull(); //check if there is any score gained

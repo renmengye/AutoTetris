@@ -100,7 +100,8 @@ public class AutoTetrisCommand implements ATCommon {
                 }
             }
         } else {
-            GameMove tmove = player.getMove();
+            GameMove tmove=null;
+            //GameMove tmove = player.getMove();
             if (board.check_done(piece, GameMove.DOWN) && tmove == null) {
                 board.bindPiece(piece); //the piece become history
                 int pscore = board.checkFull(); //check if there is any score gained

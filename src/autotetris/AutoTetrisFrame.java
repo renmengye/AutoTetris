@@ -46,10 +46,12 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
         t = new Timer(20, new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
-                tcanvas.setBoard(host.getBoard());
-                tcanvas.setPiece(host.getPiece());
-                tcanvas.setScore(host.getScore());
-                tcanvas.repaint();
+                //if (host.isAlive()) {
+                    tcanvas.setBoard(host.getBoard());
+                    tcanvas.setPiece(host.getPiece());
+                    tcanvas.setScore(host.getScore());
+                    tcanvas.repaint();
+                //}
             }
         });
         t.start();
@@ -131,11 +133,14 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
                 case DEAD: {
                     switch (e.getKeyCode()) {
                         case KeyEvent.VK_ENTER:
-                            //new_game();
+                            new_game();
                             break;
                     }
                 }
             }
+
+
+
             move = GameMove.NULL;
             tcanvas.repaint();
         } else {
