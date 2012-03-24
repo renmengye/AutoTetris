@@ -2,6 +2,7 @@ package autotetris;
 
 import autotetris.elements.Board;
 import autotetris.elements.GameStatus;
+import autotetris.elements.Grid;
 import autotetris.elements.Piece;
 import java.awt.Canvas;
 import java.awt.Color;
@@ -58,12 +59,15 @@ public class TCanvas extends Canvas implements ATCommon {
         g.drawRect(1, 1, TWIDTH - 2, THEIGHT - 2);
 
         //draw the board
-        byte[][] grid = board.toArray();
+        Grid[][] grid = board.toArray();
 
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                if (grid[j][i] == 1) {
+                if (grid[j][i].value == 1) {
+                    g.setColor(grid[j][i].color);
                     g.fillRect(i * (XDIM + GAP) + GAP, j * (YDIM + GAP) + GAP, XDIM, YDIM);
+                    g.setColor(Color.black);
+                    g.drawRect(i * (XDIM + GAP) + GAP, j * (YDIM + GAP) + GAP, XDIM, YDIM);
                 }
             }
         }
@@ -72,8 +76,14 @@ public class TCanvas extends Canvas implements ATCommon {
         for (int i = 0; i <= 3; i++) {
             int x = piece.getX() + piece.getContour(i, CONTOUR_DX);
             int y = piece.getY() + piece.getContour(i, CONTOUR_DY);
+
+            g.setColor(piece.getType().color());
             g.fillRect(x * (XDIM + GAP) + GAP, y * (YDIM + GAP) + GAP, XDIM, YDIM);
+            g.setColor(Color.black);
+            g.drawRect(x * (XDIM + GAP) + GAP, y * (YDIM + GAP) + GAP, XDIM, YDIM);
         }
+
+        g.setColor(Color.black);
         //draw the score
         g.drawString("SCORE: " + score, TWIDTH - 80, GAP + 10);
 

@@ -41,13 +41,13 @@ public class FuncHub implements ATCommon{
     }
 
     public static int holes(Board board) {
-        int count = 0, count2 = 0;
+        int count = 0;
         outer:
         for (int j = 2; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                if (board.toArray()[j][i] == 0) {
+                if (board.toArray()[j][i].value == 0) {
                     for (int m = j - 1; m > 0; m--) {
-                        if (board.toArray()[m][i] == 1) {
+                        if (board.toArray()[m][i].value == 1) {
                             count++;
                             if (j - m > 2) {
                                 count--;
@@ -72,8 +72,8 @@ public class FuncHub implements ATCommon{
         int targeth = YNUM-1;
         for (int j = YNUM - 1; j > 0 && !board.checkEmpty(j); j--) {
             for (int i = 0; i < XNUM; i++) {
-                if (board.toArray()[j][i] == 0) {
-                    if (board.toArray()[j - 1][i] == 1) {
+                if (board.toArray()[j][i].value == 0) {
+                    if (board.toArray()[j - 1][i].value == 1) {
                         targeth = j - 1;
                     }
                 }
@@ -90,21 +90,21 @@ public class FuncHub implements ATCommon{
             int j;
             for (j = YNUM - 1; j > 0; j--) {
                 if (!board.checkEmpty(j)) {
-                    if (board.toArray()[j][i] == 1) {
+                    if (board.toArray()[j][i].value == 1) {
                         counti = 0;
                     } else {
                         if (i > 0) {
                             if (i < XNUM - 1) {
-                                if (board.toArray()[j][i + 1] == 1 && board.toArray()[j][i - 1] == 1) {
+                                if (board.toArray()[j][i + 1].value == 1 && board.toArray()[j][i - 1].value == 1) {
                                     counti++;
                                 }
                             } else {
-                                if (board.toArray()[j][i - 1] == 1) {
+                                if (board.toArray()[j][i - 1].value == 1) {
                                     counti++;
                                 }
                             }
                         } else {
-                            if (board.toArray()[j][i + 1] == 1) {
+                            if (board.toArray()[j][i + 1].value == 1) {
                                 counti++;
                             }
                         }

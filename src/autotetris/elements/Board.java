@@ -1,27 +1,35 @@
 package autotetris.elements;
 
 import autotetris.ATCommon;
+import java.awt.Color;
+
 
 public class Board implements ATCommon {
 
-    private byte[][] board = new byte[YNUM][XNUM]; //store the matrix of grids
+    private Grid[][] board; //store the matrix of grids
 
     //initialize a blank board
     public Board() {
+        board = new Grid[YNUM][XNUM];
+        for(int j=0;j<YNUM;j++){
+            for(int i=0;i<XNUM;i++){
+                board[j][i]=new Grid((byte)0,Color.white);
+            }
+        }
     }
 
     //initialize an existing board
-    public Board(byte[][] board) {
+    public Board(Grid[][] board) {
         this.board = board;
     }
 
     //manually set the board
-    public void setBoard(byte[][] board) {
+    public void setBoard(Grid[][] board) {
         this.board = board;
     }
 
     //return a matrix of grids
-    public byte[][] toArray() {
+    public Grid[][] toArray() {
         return board;
     }
 
@@ -29,7 +37,7 @@ public class Board implements ATCommon {
     public void printBoard() {
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                if (board[j][i] == 1) {
+                if (board[j][i].value == 1) {
                     System.out.print("◼");
                 } else {
                     System.out.print("◻");
@@ -52,7 +60,7 @@ public class Board implements ATCommon {
                         continue inner;
                     }
                 }
-                if (board[j][i] == 1) {
+                if (board[j][i].value == 1) {
                     System.out.print("◼");
                 } else {
                     System.out.print("◻");
@@ -68,7 +76,8 @@ public class Board implements ATCommon {
             int x = piece.getX() + piece.getContour(i, CONTOUR_DX);
             int y = piece.getY() + piece.getContour(i, CONTOUR_DY);
             if (piece.check_point_range(x, y)) { //check the point is in range
-                board[y][x] = 1;
+                board[y][x].value = 1;
+                board[y][x].color=piece.getType().color();
             }
         }
     }
@@ -78,7 +87,7 @@ public class Board implements ATCommon {
         int sum = 0;
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                sum += board[j][i];
+                sum += board[j][i].value;
             }
         }
         return sum;
@@ -87,7 +96,7 @@ public class Board implements ATCommon {
     public int sum_line(int line) {
         int r = 0;
         for (int i = 0; i < XNUM; i++) {
-            r += board[line][i];
+            r += board[line][i].value;
         }
         return r;
     }
@@ -105,7 +114,7 @@ public class Board implements ATCommon {
         for (int i = 0; i <= 3; i++) {
             int y = test_piece.getY() + test_piece.getContour(i, CONTOUR_DY);
             int x = test_piece.getX() + test_piece.getContour(i, CONTOUR_DX);
-            if (board[y][x] == 1) {
+            if (board[y][x].value == 1) {
                 //System.out.println("checked done because occupied");
                 return true;
             }
@@ -121,11 +130,12 @@ public class Board implements ATCommon {
                 fullcount++;
                 for (int k = j; k > 0; k--) {
                     for (int m = 0; m < XNUM; m++) {
-                        board[k][m] = board[k - 1][m];
+                        board[k][m].value=board[k-1][m].value;
+                        board[k][m].color=board[k-1][m].color;
                     }
                 }
                 for (int k = 0; k < XNUM; k++) {
-                    board[0][k] = 0;
+                    board[0][k].value = 0;
                 }
             }
 
@@ -135,7 +145,7 @@ public class Board implements ATCommon {
 
     public boolean checkEmpty(int line) {
         for (int i = 0; i < XNUM; i++) {
-            if (board[line][i] == 1) {
+            if (board[line][i].value == 1) {
                 return false;
             }
         }
@@ -146,7 +156,7 @@ public class Board implements ATCommon {
         int count = 0;
         for (int j = YNUM - 1; j >= line; j--) {
             for (int i = 0; i < XNUM; i++) {
-                count += board[j][i];
+                count += board[j][i].value;
             }
         }
         return count / (float) XNUM * (YNUM - line);
@@ -164,10 +174,10 @@ public class Board implements ATCommon {
 
     @Override
     public Board clone() {
-        byte[][] x = new byte[YNUM][XNUM];
+        Grid[][] x = new Grid[YNUM][XNUM];
         for (int j = 0; j < YNUM; j++) {
             for (int i = 0; i < XNUM; i++) {
-                x[j][i] = board[j][i];
+                x[j][i] = board[j][i].clone();
             }
         }
         return new Board(x);
@@ -176,7 +186,7 @@ public class Board implements ATCommon {
     public boolean equals(Board x){
         for(int j=YNUM-1;j>=0;j--){
             for(int i=0;i<XNUM;i++){
-                if(x.toArray()[j][i]!=board[j][i]){
+                if(x.toArray()[j][i].value!=board[j][i].value){
                     return false;
                 }
             }

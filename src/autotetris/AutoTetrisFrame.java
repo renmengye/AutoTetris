@@ -43,7 +43,7 @@ public class AutoTetrisFrame extends JFrame implements ATCommon {
         automode = true;
         //automode = false;
 
-        t = new Timer(50, new ActionListener() {
+        t = new Timer(20, new ActionListener() {
 
             public void actionPerformed(ActionEvent e) {
                 tcanvas.setBoard(host.getBoard());

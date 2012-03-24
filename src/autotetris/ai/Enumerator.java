@@ -70,7 +70,7 @@ public class Enumerator implements ATCommon {
             int dx = piece.contour[k][0];
             int dy = piece.contour[k][1];
             if ((y + dy >= 0 && x + dx >= 0) && (y + dy < YNUM && x + dx < XNUM)) {
-                if (board.toArray()[y + dy][x + dx] == 1) {
+                if (board.toArray()[y + dy][x + dx].value == 1) {
                     return true;
                 }
             }
