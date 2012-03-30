@@ -26,8 +26,8 @@ public class FuncHub implements ATCommon{
     }
     
     public static int score(Board board){
-        return board.checkFull();
-        //return (int)Math.pow(board.checkFull(),2);
+        //return board.checkFull();
+        return (int)Math.pow(board.checkFull(),2);
     }
     
     public static int height(Board board) {
@@ -38,7 +38,7 @@ public class FuncHub implements ATCommon{
             }
         }
         height = YNUM - height;
-        return height*height;
+        return height*height*height;
     }
 
     public static int holes(Board board) {
