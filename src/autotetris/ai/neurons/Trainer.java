@@ -52,10 +52,10 @@ public class Trainer extends Thread {
                 ExampleNode ex = base.get(r.nextDouble());             
                 
                 //train the example and get the error
-                err = network.train_once(ex.example()); 
+                err = network.train_once(ex.getExample()); 
                 
                 //reset the probability of meeting the same example, has a learning factor of 5%
-                ex.set_value(ex.value() * .995 + err * 0.005);
+                ex.setProbability(ex.getProbability() * .995 + err * 0.005);
                 
                 //update database probability
                 base.update_value();                    //update the whole tree

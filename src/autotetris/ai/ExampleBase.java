@@ -14,8 +14,8 @@ public class ExampleBase {
 
         //use node method to insert
         if (head != null) {
-            head.insert(ex, p);
-            head.update_size();
+            head.insertLeaf(ex, p);
+            head.updateSize();
         }
         //if no head then create a head
         else {
@@ -26,12 +26,12 @@ public class ExampleBase {
 
     //get an example based on a random probability
     public ExampleNode get(double p) {
-        return head!=null?head.get(p):null;
+        return head!=null?head.getLeaf(p):null;
     }
 
     //update the probability of the entire tree
     public void update_value() {
-        head.update_size();
-        head.update_value();
+        head.updateSize();
+        head.updateProbability();
     }
 }
