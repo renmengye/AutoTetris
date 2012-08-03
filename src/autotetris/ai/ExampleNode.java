@@ -1,5 +1,7 @@
 package autotetris.ai;
 
+import java.util.Random;
+
 /**
  *
  * @author rmy
@@ -108,11 +110,12 @@ public class ExampleNode {
         if (left != null && right != null) {
             double lv = left.value();
             double rv = right.value();
-            double lr = lv / rv;
+            double lr = 0.5;
+            
             if (p <= lr) {
-                return left.get(p);
+                return left.get(new Random().nextDouble());
             } else {
-                return right.get(p);
+                return right.get(new Random().nextDouble());
             }
         }
 
