@@ -38,18 +38,18 @@ public class Network {
             OutputNeuron n = new OutputNeuron(j) {
 
                 @Override
-                public double activ_func(double a) {
+                public double getActivatedValue(double a) {
                     return FuncHub.gauss(a);
                     //return FuncHub.sigmoid(a);
                 }
 
                 @Override
-                public double activ_dfunc(double a) {
+                public double getActivatedValueDerivative(double a) {
                     return FuncHub.dgauss(a);
                     //return FuncHub.dsigmoid(a);
                 }
             };
-            n.set_rate(lr);
+            n.setRate(lr);
             outlay.add(n);
         }
 
@@ -62,8 +62,8 @@ public class Network {
 
         for (Neuron n : s) {
             for (Neuron m : t) {
-                n.add_target(m);
-                m.add_source(n, r.nextDouble());
+                n.addTarget(m);
+                m.addSource(n, r.nextDouble());
             }
         }
     }
@@ -72,11 +72,11 @@ public class Network {
     private void disconnect(Collection<Neuron> s, Collection<Neuron> t) {
 
         for (Neuron m : t) {
-            m.reset_source();
+            m.getSource().clear();
         }
 
         for (Neuron n : s) {
-            n.reset_target();
+            n.getTarget().clear();
         }
 
     }
@@ -94,13 +94,13 @@ public class Network {
             Perceptron p = new Perceptron((hidlay.size() + 1) * 1000 + layer.size()) {
 
                 @Override
-                public double activ_func(double a) {
+                public double getActivatedValue(double a) {
                     return FuncHub.gauss(a);
                     //return FuncHub.sigmoid(a);
                 }
 
                 @Override
-                public double activ_dfunc(double a) {
+                public double getActivatedValueDerivative(double a) {
                     return FuncHub.dgauss(a);
                     //return FuncHub.dsigmoid(a);
                 }
@@ -140,24 +140,24 @@ public class Network {
 
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.feed_start();
+                n.startFeed();
             }
 
             //wait every neuron in the layer to finish
             for (Neuron n : layer) {
-                n.feed().join();
+                n.getFeed().join();
             }
         }
 
         //activating the output layer
         for (Neuron n : outlay) {
-            n.feed_start();
+            n.startFeed();
         }
 
 
         //wait output layer to join back
         for (Neuron n : outlay) {
-            n.feed().join();
+            n.getFeed().join();
             //System.out.println("o-joined");
         }
 
@@ -165,7 +165,7 @@ public class Network {
         //store the output neurons value into a new list
         List<Double> result = new LinkedList<Double>();
         for (Neuron n : outlay) {
-            result.add(n.value());
+            result.add(n.getValue());
         }
         return result;
 
@@ -197,14 +197,14 @@ public class Network {
         for (Neuron n : outlay) {
             
             //by the way collect the error
-            esum += n.error();
+            esum += n.getError();
             
-            n.back_start();
+            n.startBack();
         }
 
         //wait all threads join
         for (Neuron n : outlay) {
-            n.back().join();
+            n.getBack().join();
         }
 
         //hidden layer error back prop
@@ -217,12 +217,12 @@ public class Network {
 
             //start the calc value process simultaneously throughout layer i
             for (Neuron n : layer) {
-                n.back_start();
+                n.startBack();
             }
 
             //wait every neuron in the layer to finish
             for (Neuron n : layer) {
-                n.back().join();
+                n.getBack().join();
             }
         }
         

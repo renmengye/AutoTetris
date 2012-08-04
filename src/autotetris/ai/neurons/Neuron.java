@@ -9,16 +9,37 @@ import java.util.Map.Entry;
  */
 public abstract class Neuron {
 
-    protected int id;                               //id number for different neurons
-    protected double net;                           //net linear sum
-    protected double value;                         //value send to next level
-    protected double bias;                          //bias value add to the linear sum
-    protected double error;                         //error calced by back_prop
-    protected double rate;                          //learning rate
-    protected Map<Neuron, Double> source;           //storing the source neurons and the linear weights
-    protected List<Neuron> target;                  //stroing the list of target neurons
-    protected Thread feed, back;                    //thread for forward feeding and back propagation
+    // id number for different neurons
+    private int id; 
+    
+    // net linear sum from the source
+    private double netLinearSum;
+    
+    // value send to next level target
+    private double value;
+    
+    // bias value add to the linear sum
+    private double bias;
+    
+    // error calced by back_prop
+    private double error;
+    
+    // learning rate
+    private double rate;
+    
+    // storing the source neurons and the linear weights
+    private Map<Neuron, Double> source;
+    
+    // stroing the list of target neurons
+    private List<Neuron> target;
+    
+    // Forward feed thread
+    private Thread feed;
+    
+    // Back propagate thread
+    private Thread back;
 
+    // Contruct a neuron with an id
     public Neuron(int id) {
         this.id = id;
         bias = 0.0;                           //assume bias is 0 for this simple model
@@ -27,115 +48,193 @@ public abstract class Neuron {
         target = new LinkedList<Neuron>();
     }
 
-    //return neuron value
-    public double value() {
+    //add a target neuron to this neuron
+    public void addTarget(Neuron n) {
+        getTarget().add(n);
+    }
+
+    // add a source neuron to this neuron
+    public void addSource(Neuron n, double w) {
+        getSource().put(n, w);                   //randomly put weight as 1, need to change afterwards
+    }
+    
+    // returns the collection of the weights for the source neurons
+    public Collection<Double> getWeights(){
+        return getSource().values();
+    }
+
+    // pass the net sum to activation function, needs to be overrided
+    public abstract double getActivatedValue(double a);
+
+    // pass the net sum to the derivative of activation function
+    public abstract double getActivatedValueDerivative(double a);
+    
+    public void startFeed(){
+        setFeed(new Thread() {
+
+             @Override
+             public void run() {
+                 updateValue();
+             }
+         });
+        getFeed().start();
+    }
+
+    public void startBack(){
+        setBack(new Thread() {
+
+             @Override
+             public void run() {
+                 updateError();
+                 updateWeight();
+             }
+         });
+        getBack().start();
+    }
+    
+    public void updateValue() {
+        netLinearSum = 0.0;
+        for (Neuron n : getSource().keySet()) {      //doing a linear combination sum
+            netLinearSum += n.getValue() * getSource().get(n);
+        }
+        netLinearSum += getBias();
+        setValue(getActivatedValue(getNetLinearSum()));             //multiply the non-linear activation function
+    }
+    
+
+    public void updateError() {
+        double sum = 0;
+        for (Neuron n : getTarget()) {               //get a linear sum of the error before
+            sum += n.getError() * n.getSource().get(this);
+        }
+        setError(getRate() * getActivatedValueDerivative(getNetLinearSum()) * sum);       //times the derivative of activation function
+    }
+
+    public void updateWeight() {
+
+        for (Entry<Neuron, Double> e : getSource().entrySet()) {      //doing a linear combination sum
+            double w = e.getValue();
+            double y = e.getKey().getValue();
+            e.setValue(w + getError() * y);
+        }
+    }
+
+    /**
+     * @return the id
+     */
+    public int getId() {
+        return id;
+    }
+
+    /**
+     * @return the netLinearSum
+     */
+    public double getNetLinearSum() {
+        return netLinearSum;
+    }
+
+    /**
+     * @return the value
+     */
+    public double getValue() {
         return value;
     }
-    
-    //return neuron error
-    public double error() {
+
+    /**
+     * @return the bias
+     */
+    public double getBias() {
+        return bias;
+    }
+
+    /**
+     * @return the error
+     */
+    public double getError() {
         return error;
     }
-    
-    //return neuron learning rate
-    public double rate() {
+
+    /**
+     * @param error the error to set
+     */
+    public void setError(double error) {
+        this.error = error;
+    }
+
+    /**
+     * @return the rate
+     */
+    public double getRate() {
         return rate;
     }
 
-    //set neuron learning rate
-    public void set_rate(double r) {
-        rate = r;
+    /**
+     * @param rate the rate to set
+     */
+    public void setRate(double rate) {
+        this.rate = rate;
     }
 
-    //add a target neuron to this neuron
-    public void add_target(Neuron n) {
-        target.add(n);
+    /**
+     * @return the source
+     */
+    public Map<Neuron, Double> getSource() {
+        return source;
     }
 
-    //reset all the targets
-    public void reset_target() {
-        target.clear();
+    /**
+     * @param source the source to set
+     */
+    public void setSource(Map<Neuron, Double> source) {
+        this.source = source;
     }
 
-    //add a source neuron to this neuron
-    public void add_source(Neuron n, double w) {
-        source.put(n, w);                   //randomly put weight as 1, need to change afterwards
+    /**
+     * @return the target
+     */
+    public List<Neuron> getTarget() {
+        return target;
     }
 
-    //reset all the sources
-    public void reset_source() {
-        source.clear();
-    }
-    
-    public Collection<Double> get_weight(){
-        return source.values();
+    /**
+     * @param target the target to set
+     */
+    public void setTarget(List<Neuron> target) {
+        this.target = target;
     }
 
-    public double activ_func(double a) {
-        return 0.0;
-    }
-
-    public double activ_dfunc(double a) {
-        return 0.0;
-    }
-    
-    public void feed_start(){
-        feed = new Thread() {
-
-            @Override
-            public void run() {
-                calc_value();
-            }
-        };
-        feed.start();
-    }
-    
-    public Thread feed(){
+    /**
+     * @return the feed
+     */
+    public Thread getFeed() {
         return feed;
     }
 
-    public void back_start(){
-        back = new Thread() {
-
-            @Override
-            public void run() {
-                calc_error();
-                update_weight();
-            }
-        };
-        back.start();
+    /**
+     * @param feed the feed to set
+     */
+    public void setFeed(Thread feed) {
+        this.feed = feed;
     }
-    
-    public Thread back(){
+
+    /**
+     * @return the back
+     */
+    public Thread getBack() {
         return back;
     }
-    
-    
-    public void calc_value() {
-        net = 0.0;
-        for (Neuron n : source.keySet()) {      //doing a linear combination sum
-            net += n.value() * source.get(n);
-        }
-        net += bias;
-        value = activ_func(net);             //multiply the non-linear activation function
-    }
-    
 
-    public void calc_error() {
-        double sum = 0;
-        for (Neuron n : target) {               //get a linear sum of the error before
-            sum += n.error() * n.source.get(this);
-        }
-        error = rate * activ_dfunc(net) * sum;       //times the derivative of activation function
+    /**
+     * @param back the back to set
+     */
+    public void setBack(Thread back) {
+        this.back = back;
     }
 
-    public void update_weight() {
-
-        for (Entry<Neuron, Double> e : source.entrySet()) {      //doing a linear combination sum
-            double w = e.getValue();
-            double y = e.getKey().value();
-            e.setValue(w + error * y);
-
-        }
+    /**
+     * @param value the value to set
+     */
+    protected void setValue(double value) {
+        this.value = value;
     }
 }

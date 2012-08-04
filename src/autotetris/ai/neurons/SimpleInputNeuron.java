@@ -12,11 +12,20 @@ public class SimpleInputNeuron extends Neuron{
     
     
     public SimpleInputNeuron(int id){
-        
         super(id);
     }
     
     public void input(double v){
-        value=v;
+        setValue(v);
+    }
+
+    @Override
+    public double getActivatedValue(double a) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public double getActivatedValueDerivative(double a) {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 }

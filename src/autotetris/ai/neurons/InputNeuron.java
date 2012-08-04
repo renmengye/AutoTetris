@@ -6,6 +6,8 @@ import autotetris.elements.Board;
  *
  * @author rmy
  */
+
+
 public class InputNeuron extends Neuron{
     
     public InputNeuron(int id){
@@ -15,4 +17,16 @@ public class InputNeuron extends Neuron{
     public void sensor(Board board){
         
     }
+
+    @Override
+    public double getActivatedValue(double a) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public double getActivatedValueDerivative(double a) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    
 }

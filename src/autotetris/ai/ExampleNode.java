@@ -8,6 +8,8 @@ import java.util.Random;
  */
 public class ExampleNode {
 
+    // TODO Make sserialization on the database
+    
     private Example example;
     private ExampleNode left;
     private ExampleNode right;
