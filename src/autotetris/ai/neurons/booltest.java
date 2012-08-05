@@ -65,7 +65,7 @@ public class booltest {
                     List<Double> u = new LinkedList<Double>();
                     u.add((double) r1);
                     u.add((double) r2);
-                    List<Double> result = n.test(new Example<Double,Double>(u));
+                    List<Double> result = n.runOnce(new Example<Double,Double>(u));
                     
                     //return result
                     System.out.printf("The neural network output: %.2f\n", result.get(0));

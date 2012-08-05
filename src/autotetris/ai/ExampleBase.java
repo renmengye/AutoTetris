@@ -1,36 +1,58 @@
 package autotetris.ai;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author MengYe
  */
+public class ExampleBase implements Serializable {
 
-public class ExampleBase {
+    private ExampleNode head;
+    private Map<Example, ExampleNode> map;
 
-    ExampleNode head;
+    public ExampleBase() {
+        head = null;
+        map = new HashMap<Example, ExampleNode>();
+    }
 
     //insert an example to the data base
     public void insert(Example ex, double p) {
 
+        if (map.containsKey(ex)) {
+            throw new IllegalArgumentException("Cannot insert repeated examples");
+        }
+
+
         //use node method to insert
         if (head != null) {
-            head.insertLeaf(ex, p);
+            map.put(ex, head.insertLeaf(ex, p));
             head.updateSize();
-        }
-        //if no head then create a head
+        } //if no head then create a head
         else {
             head = new ExampleNode(ex, p);
+            map.put(ex, head);
         }
-        update_value();
+        updateProbability();
     }
 
     //get an example based on a random probability
-    public ExampleNode get(double p) {
-        return head!=null?head.getLeaf(p):null;
+    public Example getExample(double probability) {
+        return head != null ? head.getLeaf(probability).getExample() : null;
+    }
+
+    public double getExampleProbability(Example ex) {
+        return map.get(ex).getProbability();
+    }
+
+    public void setExampleProbability(Example ex, double probability) {
+        map.get(ex).setProbability(probability);
     }
 
     //update the probability of the entire tree
-    public void update_value() {
+    public void updateProbability() {
         head.updateSize();
         head.updateProbability();
     }

@@ -1,12 +1,13 @@
 package autotetris.ai;
 
+import java.io.Serializable;
 import java.util.Random;
 
 /**
  *
  * @author rmy
  */
-public class ExampleNode {
+public class ExampleNode implements Serializable{
 
     // TODO Make sserialization on the database
     
@@ -94,14 +95,14 @@ public class ExampleNode {
     }
 
     // insert an example to the leaf, with certain probability
-    public void insertLeaf(Example ex, double p) {
+    public ExampleNode insertLeaf(Example ex, double p) {
 
         // if both chilren present, send example to child with smaller size
         if (getLeft() != null && getRight() != null) {
             if (getLeft().getSize() < getRight().getSize()) {
-                getLeft().insertLeaf(ex, p);
+                return getLeft().insertLeaf(ex, p);
             } else {
-                getRight().insertLeaf(ex, p);
+                return getRight().insertLeaf(ex, p);
             }
         } // since there is no circumstance of only one child
         // check if left child is null (i.e. if this is leaf)
@@ -112,7 +113,9 @@ public class ExampleNode {
             setLeft(this.clone());
             setExample(null);
             setSize(getLeft().getSize() + getRight().getSize());
+            return newNode;
         }
+        return null;
     }
 
     // clone an example containers

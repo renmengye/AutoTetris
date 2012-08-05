@@ -2,39 +2,33 @@ package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
 import autotetris.ai.FuncHub;
+import java.io.Serializable;
 import java.util.*;
 
 /**
  *
  * @author rmy
  */
-public class Network {
+public class Network implements Serializable{
 
     private LinkedList<Neuron> inlay;
     private LinkedList<LinkedList<Neuron>> hidlay;
     private LinkedList<Neuron> outlay;
-    private int input_size, output_size;
-    private Random r;
 
     //constructor with input size and output size
-    public Network(int is, int os, double lr) {
+    public Network(int inputSize, int outputSize, double lr) {
 
         inlay = new LinkedList<Neuron>();
         hidlay = new LinkedList<LinkedList<Neuron>>();
         outlay = new LinkedList<Neuron>();
 
-        this.input_size = is;
-        this.output_size = os;
-
-        r = new Random();
-
         //initializing input neurons
-        for (int j = 0; j < input_size; j++) {
+        for (int j = 0; j < inputSize; j++) {
             inlay.add(new SimpleInputNeuron(j));
         }
 
         //initializing output neurons
-        for (int j = 0; j < output_size; j++) {
+        for (int j = 0; j < outputSize; j++) {
             OutputNeuron n = new OutputNeuron(j) {
 
                 @Override
@@ -63,7 +57,7 @@ public class Network {
         for (Neuron n : s) {
             for (Neuron m : t) {
                 n.addTarget(m);
-                m.addSource(n, r.nextDouble());
+                m.addSource(n, 1.0);
             }
         }
     }
@@ -82,7 +76,7 @@ public class Network {
     }
 
     //add a hidden layer with n hidden nodes
-    public void add_hidden_layer(int n) {    //add n neurons to a new layer
+    public void addHiddenLayer(int n) {    //add n neurons to a new layer
 
         //initialize a new linked list to store hidden neurons
         LinkedList<Neuron> layer = new LinkedList<Neuron>();
@@ -123,10 +117,10 @@ public class Network {
         hidlay.add(layer);
     }
 
-    public List<Double> test(Example ex) throws InterruptedException {
+    public List<Double> runOnce(Example ex) throws InterruptedException {
 
         //input the simple input neurons with list values
-        Iterator<Double> vi = ex.input().listIterator();
+        Iterator<Double> vi = ex.getInputValues().listIterator();
         for (Neuron i : inlay) {
             if (vi.hasNext()) {
                 ((SimpleInputNeuron) i).input(vi.next());
@@ -172,17 +166,17 @@ public class Network {
     }
 
     //train the network with one example return the error sum
-    public double train_once(Example ex) throws InterruptedException {
+    public double trainOnce(Example ex) throws InterruptedException {
         
         //record the total error and return
         double esum = 0.0;
         
         //run the network in feed mode
-        test(ex);
+        runOnce(ex);
         
         
         //maybe need to fix this assumption later on, but for now it seems like all networks use double type
-        Iterator<Double> ci = ex.correct().listIterator();
+        Iterator<Double> ci = ex.getExpectedValues().listIterator();
 
         //output layer calculate error
         for (Neuron n : outlay) {

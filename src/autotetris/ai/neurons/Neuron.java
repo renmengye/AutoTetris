@@ -1,5 +1,6 @@
 package autotetris.ai.neurons;
 
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 
@@ -7,7 +8,7 @@ import java.util.Map.Entry;
  *
  * @author rmy
  */
-public abstract class Neuron {
+public class Neuron implements Serializable{
 
     // id number for different neurons
     private int id; 
@@ -28,16 +29,16 @@ public abstract class Neuron {
     private double rate;
     
     // storing the source neurons and the linear weights
-    private Map<Neuron, Double> source;
+    private HashMap<Neuron, Double> source;
     
     // stroing the list of target neurons
-    private List<Neuron> target;
+    private LinkedList<Neuron> target;
     
     // Forward feed thread
-    private Thread feed;
+    private transient Thread feed;
     
     // Back propagate thread
-    private Thread back;
+    private transient Thread back;
 
     // Contruct a neuron with an id
     public Neuron(int id) {
@@ -64,10 +65,14 @@ public abstract class Neuron {
     }
 
     // pass the net sum to activation function, needs to be overrided
-    public abstract double getActivatedValue(double a);
+    public double getActivatedValue(double a){
+        return 0.0;
+    }
 
     // pass the net sum to the derivative of activation function
-    public abstract double getActivatedValueDerivative(double a);
+    public double getActivatedValueDerivative(double a){
+        return 0.0;
+    }
     
     public void startFeed(){
         setFeed(new Thread() {
@@ -178,14 +183,14 @@ public abstract class Neuron {
     /**
      * @return the source
      */
-    public Map<Neuron, Double> getSource() {
+    public HashMap<Neuron, Double> getSource() {
         return source;
     }
 
     /**
      * @param source the source to set
      */
-    public void setSource(Map<Neuron, Double> source) {
+    public void setSource(HashMap<Neuron, Double> source) {
         this.source = source;
     }
 
@@ -199,7 +204,7 @@ public abstract class Neuron {
     /**
      * @param target the target to set
      */
-    public void setTarget(List<Neuron> target) {
+    public void setTarget(LinkedList<Neuron> target) {
         this.target = target;
     }
 
