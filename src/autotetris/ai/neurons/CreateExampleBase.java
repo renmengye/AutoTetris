@@ -39,7 +39,7 @@ public class CreateExampleBase {
     }
 
     public static void writeBase(ExampleBase base) {
-        String file = "XorExampleBase.ser";
+        String file = "data/XorExampleBase.ser";
         FileOutputStream fos = null;
         ObjectOutputStream oos = null;
 

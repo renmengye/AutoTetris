@@ -18,61 +18,111 @@ import java.util.logging.Logger;
 public class Trainer extends Thread {
 
     private Network network;
-    protected ExampleBase base;
-    private double tar_err;
-    private double avg_num;
+    private ExampleBase base;
+    private double passingErrorRate;
+    private double passingErrorSize;
 
-    public Trainer(ExampleBase b, double te, int an) {
-
-        network = new Network(2, 1, 1);
-        base = b;
-        network.addHiddenLayer(2);
-        tar_err = te;
-        avg_num = an;
+    public Trainer(ExampleBase base, double error, int size) {
+        this.network = new Network(2, 1, 1);
+        this.base = base;
+        this.network.addHiddenLayer(2);
+        this.passingErrorRate = error;
+        this.passingErrorSize = size;
     }
-
-    public Network network() {
-        return network;
-    }
-
+    
     @Override
     public void run() {
-        double err;
-        double err_avg = 0.0;
+        double errorOnce;
+        double errorAverage = 0.0;
         int count;
-        double rate = 1;
-        LinkedList<Double> error_list = new LinkedList<Double>();
+        
+        LinkedList<Double> errorList = new LinkedList<Double>();
 
         //train until the error average matches the precision and over the least number of cases
-        for (count = 0; err_avg > tar_err | count < avg_num; count++) {
+        for (count = 0; errorAverage > getPassingErrorRate() | count < getPassingErrorSize(); count++) {
             try {
                 //get an example according to a randomized number
-
-                Example ex = base.getExample(new Random().nextDouble());
+                Example ex = getBase().getExample(new Random().nextDouble());
 
                 //train the example and get the error
-                err = network.trainOnce(ex);
+                errorOnce = getNetwork().trainOnce(ex);
 
                 //reset the probability of meeting the same example, has a learning factor of 5%
-                base.setExampleProbability(ex, base.getExampleProbability(ex) * .995 + err * 0.005);
+                getBase().setExampleProbability(ex, getBase().getExampleProbability(ex) * .995 + errorOnce * 0.005);
 
                 //update database probability
-                base.updateProbability();                    //update the whole tree
-                System.out.printf("count: %d\terror: %.5f\n", count, err / rate);
+                getBase().updateProbability();                    //update the whole tree
+                System.out.printf("count: %d\terror: %.5f\n", count, errorOnce/1.0);
 
                 //update the errorlist
-                if (error_list.size() >= avg_num) {
-                    err_avg -= Math.abs(error_list.pop()) / (double) avg_num;
-                    err_avg += Math.abs(err) / (double) avg_num / rate;
+                if (errorList.size() >= getPassingErrorSize()) {
+                    errorAverage -= Math.abs(errorList.pop()) / (double) getPassingErrorSize();
+                    errorAverage += Math.abs(errorOnce) / (double) getPassingErrorSize() / 1.0;
                 } else {
-                    err_avg = err_avg * error_list.size() / (error_list.size() + 1) + Math.abs(err / rate) / (error_list.size() + 1);
+                    errorAverage = errorAverage * errorList.size() / (errorList.size() + 1) + Math.abs(errorOnce / 1.0) / (errorList.size() + 1);
                 }
 
-                error_list.addLast(err / rate);
+                errorList.addLast(errorOnce / 1.0);
             } catch (InterruptedException ex1) {
                 Logger.getLogger(Trainer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
         System.out.println("Training network completed.\n");
+    }
+
+    /**
+     * @return the network
+     */
+    public Network getNetwork() {
+        return network;
+    }
+
+    /**
+     * @param network the network to set
+     */
+    public void setNetwork(Network network) {
+        this.network = network;
+    }
+
+    /**
+     * @return the base
+     */
+    public ExampleBase getBase() {
+        return base;
+    }
+
+    /**
+     * @param base the base to set
+     */
+    public void setBase(ExampleBase base) {
+        this.base = base;
+    }
+
+    /**
+     * @return the passingErrorRate
+     */
+    public double getPassingErrorRate() {
+        return passingErrorRate;
+    }
+
+    /**
+     * @param passingErrorRate the passingErrorRate to set
+     */
+    public void setPassingErrorRate(double passingErrorRate) {
+        this.passingErrorRate = passingErrorRate;
+    }
+
+    /**
+     * @return the passingErrorSize
+     */
+    public double getPassingErrorSize() {
+        return passingErrorSize;
+    }
+
+    /**
+     * @param passingErrorSize the passingErrorSize to set
+     */
+    public void setPassingErrorSize(double passingErrorSize) {
+        this.passingErrorSize = passingErrorSize;
     }
 }

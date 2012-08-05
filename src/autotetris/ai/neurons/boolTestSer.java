@@ -58,7 +58,7 @@ public class boolTestSer {
                 System.out.println("Training network completed.\n");
 
                 // get the trained network
-                network = train.network();
+                network = train.getNetwork();
 
                 // save the trained network
                 trySaveNetwork(network);
@@ -88,7 +88,7 @@ public class boolTestSer {
 
             }
         } catch (Exception ex) {
-            Logger.getLogger(booltest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 

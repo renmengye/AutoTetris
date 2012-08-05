@@ -24,7 +24,7 @@ public class Network implements Serializable{
 
         //initializing input neurons
         for (int j = 0; j < inputSize; j++) {
-            inlay.add(new SimpleInputNeuron(j));
+            inlay.add(new InputNeuron(j));
         }
 
         //initializing output neurons
@@ -119,13 +119,13 @@ public class Network implements Serializable{
 
     public List<Double> runOnce(Example ex) throws InterruptedException {
 
-        //input the simple input neurons with list values
+        //input the input neurons with list values
         Iterator<Double> vi = ex.getInputValues().listIterator();
         for (Neuron i : inlay) {
             if (vi.hasNext()) {
-                ((SimpleInputNeuron) i).input(vi.next());
+                ((InputNeuron) i).input(vi.next());
             } else {
-                ((SimpleInputNeuron) i).input(0.0);
+                ((InputNeuron) i).input(0.0);
             }
         }
 
