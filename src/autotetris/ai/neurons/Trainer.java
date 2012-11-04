@@ -1,5 +1,5 @@
-/*
- * This trainer class takes in an Example and returns the trained network
+/**
+ * Trainer takes in an Example database and returns the trained network
  */
 package autotetris.ai.neurons;
 
@@ -25,9 +25,9 @@ public class Trainer extends Thread {
     public Trainer(ExampleBase base, double error, int size) {
         this.network = new Network(2, 1, .5);
         this.base = base;
-        this.network.addHiddenLayer(2);
-        //this.network.addHiddenLayer(10);
-        //this.network.addHiddenLayer(3);
+        this.network.addHiddenLayer(3);
+        this.network.addHiddenLayer(10);
+        this.network.addHiddenLayer(3);
         this.passingErrorRate = error;
         this.passingErrorSize = size;
     }
@@ -48,15 +48,16 @@ public class Trainer extends Thread {
                 //get an example according to a randomized number
                 Example<Double, Double> ex = this.base.getExample(new Random().nextDouble());
 
-                List<Double> result = this.network.runOnce(ex, true);
+                network.setTraining(true);
+                List<Double> result = this.network.runOnce(ex);
                 //train the example and get the error
                 errorOnce = ex.getExpectedValues().get(0) - result.get(0);
 
                 //reset the probability of meeting the same example, has a learning factor of 5%
-                //this.base.setExampleProbability(ex, this.base.getExampleProbability(ex) * .995 + errorOnce * 0.005);
+                this.base.setExampleProbability(ex, this.base.getExampleProbability(ex) * .995 + errorOnce * 0.005);
 
                 //update database probability
-                //this.base.updateProbability();                    //update the whole tree
+                this.base.updateProbability();                    //update the whole tree
                 System.out.printf("count: %d\tinput:%.1f %.1f\toutput:%.5f \terror: %.5f\n", count, ex.getInputValues().get(0), ex.getInputValues().get(1), result.get(0), errorOnce / 1.0);
 
                 //update the errorlist

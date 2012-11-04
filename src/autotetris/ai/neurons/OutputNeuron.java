@@ -15,16 +15,12 @@ public class OutputNeuron extends Neuron {
         super(bias, rate, activator, network);
     }
 
-    public void setError(double t) throws NeuronNotConnectedException {
+    public synchronized void setError(double t) throws NeuronNotConnectedException {
         this.error = 
                 this.rate 
                 * (t - getValue()) 
                 * this.activator.computeActivedValueDerivative(this.sourceConnector.getNetLinearSum());
         this.updateWeight();
         this.sourceConnector.sendValue(this.error);
-
-        synchronized (this.network) {
-            this.network.notifyAll();
-        }
     }
 }

@@ -20,6 +20,9 @@ public class Neuron implements Serializable, Runnable {
     protected double error;
     // learning rate
     protected double rate;
+    //If the neuron is set to wait for target neurons
+    protected boolean waitForTarget;
+    protected boolean waitForSource;
     // manage connections to the sources
     protected final NeuronConnector sourceConnector;
     // manage connections to the targets
@@ -106,7 +109,7 @@ public class Neuron implements Serializable, Runnable {
     protected void updateError() {
         // multiply the derivative of activation function
         this.error =
-                (this.rate 
+                (this.rate
                 * this.activator.computeActivedValueDerivative(this.sourceConnector.getNetLinearSum())
                 * this.targetConnector.getNetLinearSum());
     }
@@ -119,42 +122,63 @@ public class Neuron implements Serializable, Runnable {
     }
 
     public void run() {
-        synchronized (this.network) {
-            while (true) {
-                
-                // Collected all the sources, can send value to targets
-                if (this.sourceConnector.isReady()) {
 
-                    this.updateValue();
+        while (true) {
 
-                    try {
-                        this.targetConnector.sendValue(value);
-                    } catch (NeuronNotConnectedException ex) {
-                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+            if (this.waitForSource) {
+                // Wait the sources to send value
+                while (true) {
+
+                    // Collected all the sources, can send value to targets
+                    if (this.sourceConnector.isReady()) {
+
+                        this.updateValue();
+
+                        try {
+                            this.targetConnector.sendValue(value);
+                        } catch (NeuronNotConnectedException ex) {
+                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        //this.network.notifyAll();
+                        this.sourceConnector.resetCount();
+                        break;
                     }
 
-                    this.network.notifyAll();
-                    this.sourceConnector.resetCount();
-                }
-                
-                // Collected all the errors, can send error to sources
-                if (this.targetConnector.isReady()) {
-                    this.updateError();
-                    try {
-                        this.updateWeight();
-                        this.sourceConnector.sendValue(error);
-                    } catch (NeuronNotConnectedException ex) {
-                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                    synchronized (this.sourceConnector) {
+                        try {
+                            this.sourceConnector.wait();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
-                    
-                    this.network.notifyAll();
-                    this.targetConnector.resetCount();
                 }
-                
-                try {
-                    this.network.wait();
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            if (this.waitForTarget) {
+                // Wait the target the send error back
+                while (true) {
+
+                    // Collected all the errors, can send error to sources
+                    if (this.targetConnector.isReady()) {
+                        this.updateError();
+                        try {
+                            this.updateWeight();
+                            this.sourceConnector.sendValue(error);
+                        } catch (NeuronNotConnectedException ex) {
+                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        this.targetConnector.resetCount();
+                        break;
+                    }
+
+                    synchronized (this.targetConnector) {
+                        try {
+                            this.targetConnector.wait();
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
                 }
             }
         }

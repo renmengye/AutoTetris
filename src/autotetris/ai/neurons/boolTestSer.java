@@ -15,10 +15,10 @@ import java.util.List;
  */
 public class boolTestSer {
 
-    public static final String defaultNetworkPath = "data/XorNetwork.ser";
-    public static final String defaultBasePath = "data/XorExampleBase.ser";
-    //public static final String defaultBasePath = "data/AndExampleBase.ser";    
-    //public static final String defaultNetworkPath = "data/AndNetwork.ser";
+    //public static final String defaultNetworkPath = "data/XorNetwork.ser";
+    //public static final String defaultBasePath = "data/XorExampleBase.ser";
+    public static final String defaultBasePath = "data/AndExampleBase.ser";    
+    public static final String defaultNetworkPath = "data/AndNetwork.ser";
 
 
     public static void main(String[] args) throws InterruptedException {
@@ -72,7 +72,8 @@ public class boolTestSer {
 
             //validate input
             if ((r1 == 1 || r1 == 0) && (r2 == 1 || r2 == 0)) {
-                List<Double> result = network.runOnce(new Example<Double, Double>((double) r1, (double) r2), false);
+                network.setTraining(false);
+                List<Double> result = network.runOnce(new Example<Double, Double>((double) r1, (double) r2));
                 //return result
                 System.out.printf("The neural network output: %.2f\n", result.get(0));
             } //invalid input

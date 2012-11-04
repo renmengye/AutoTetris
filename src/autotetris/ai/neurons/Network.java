@@ -29,6 +29,7 @@ public class Network implements Serializable {
     private Neuron errorNeuron;
     private Neuron resultNeuron;
     private double learningRate;
+    private boolean isTraining;
 
     /**
      * Construct a network
@@ -42,9 +43,17 @@ public class Network implements Serializable {
         this.inputLayer = new LinkedList<Neuron>();
         this.hiddenLayers = new LinkedList<LinkedList<Neuron>>();
         this.outputLayer = new LinkedList<Neuron>();
+
         this.resultNeuron = new Neuron(this);
+        this.resultNeuron.waitForSource = true;
+        this.resultNeuron.waitForTarget = false;
+
         this.errorNeuron = new Neuron(this);
+        this.errorNeuron.waitForSource = false;
+        this.errorNeuron.waitForTarget = true;
+
         this.learningRate = learningRate;
+        this.isTraining = true;
 
         //initializing input neurons
         for (int j = 0; j < inputSize; j++) {
@@ -140,16 +149,44 @@ public class Network implements Serializable {
     }
 
     public void start() {
+
+        int input = 1;
         for (Neuron neuron : this.inputLayer) {
-            new Thread(neuron).start();
+            neuron.waitForSource = false;
+            neuron.waitForTarget = true;
+            new Thread(neuron, "Input " + input).start();
+            input++;
         }
+
+
+        int layer = 1;
+        for (List<Neuron> hiddenLayer : this.hiddenLayers) {
+            int i = 1;
+            for (Neuron neuron : hiddenLayer) {
+                neuron.waitForSource = true;
+                neuron.waitForTarget = this.isTraining;
+                new Thread(neuron, "Hidden " + layer + "-" + i).start();
+                i++;
+            }
+            layer++;
+        }
+
+        int output = 1;
+        for (Neuron neuron : this.outputLayer) {
+            neuron.waitForSource = true;
+            neuron.waitForTarget = false;
+            new Thread(neuron, "Output " + output).start();
+            output++;
+        }
+    }
+
+    public void setTraining(boolean isTraining) {
+        this.isTraining = isTraining;
         for (List<Neuron> hiddenLayer : this.hiddenLayers) {
             for (Neuron neuron : hiddenLayer) {
-                new Thread(neuron).start();
+                neuron.waitForSource = true;
+                neuron.waitForTarget = this.isTraining;
             }
-        }
-        for (Neuron neuron : this.outputLayer) {
-            new Thread(neuron).start();
         }
     }
 
@@ -161,7 +198,13 @@ public class Network implements Serializable {
      * @return The result of the output layer
      * @throws InterruptedException
      */
-    public List<Double> runOnce(Example example, boolean train) throws InterruptedException {
+    public List<Double> runOnce(Example example) throws InterruptedException {
+
+        // Notify all neurons that another run has started
+        //synchronized (this) {
+        //    this.notifyAll();
+        //}
+
         // Input the input neurons with list values
         Iterator<Double> inputIterator = example.getInputValues().listIterator();
         for (Neuron i : this.inputLayer) {
@@ -176,32 +219,43 @@ public class Network implements Serializable {
             }
         }
 
-        synchronized (this) {
-            while (true) {
-                if (this.resultNeuron.sourceConnector.isReady()) {
-                    this.resultNeuron.sourceConnector.resetCount();
-                    // If want to train the network then force the output neuron to send the errors
-                    if (train) {
-                        Iterator<Double> resultIterator = example.getExpectedValues().listIterator();
-                        for (Neuron neuron : this.outputLayer) {
-                            try {
-                                ((OutputNeuron) neuron).setError(resultIterator.next());
-                            } catch (NeuronNotConnectedException ex) {
-                                Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
+        while (true) {
+
+            // Wait the output neuron result
+            synchronized (this.resultNeuron.sourceConnector) {
+                while (true) {
+                    if (this.resultNeuron.sourceConnector.isReady()) {
+                        this.resultNeuron.sourceConnector.resetCount();
+                        break;
                     } else {
-                        return this.resultNeuron.sourceConnector.getValueList();
+                        this.resultNeuron.sourceConnector.wait();
                     }
                 }
-
-                if (this.errorNeuron.targetConnector.isReady()) {
-                    this.errorNeuron.targetConnector.resetCount();
-                    return this.resultNeuron.sourceConnector.getValueList();
-                }
-
-                this.wait();
             }
+
+            // Wait the input neuron error
+            // If want to train the network then force the output neuron to send the errors
+            if (this.isTraining) {
+                Iterator<Double> resultIterator = example.getExpectedValues().listIterator();
+                for (Neuron neuron : this.outputLayer) {
+                    try {
+                        ((OutputNeuron) neuron).setError(resultIterator.next());
+                    } catch (NeuronNotConnectedException ex) {
+                        Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                synchronized (this.errorNeuron.targetConnector) {
+                    while (true) {
+                        if (this.errorNeuron.targetConnector.isReady()) {
+                            this.errorNeuron.targetConnector.resetCount();
+                            break;
+                        } else {
+                            this.errorNeuron.targetConnector.wait();
+                        }
+                    }
+                }
+            }
+            return this.resultNeuron.sourceConnector.getValueList();
         }
     }
 
@@ -231,8 +285,13 @@ public class Network implements Serializable {
             oos = new ObjectOutputStream(fos);
             oos.writeObject(this);
             oos.close();
+
+
+
+
         } catch (IOException ex) {
-            Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(boolTestSer.class
+                    .getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
