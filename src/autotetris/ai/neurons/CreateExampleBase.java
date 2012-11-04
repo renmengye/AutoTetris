@@ -7,13 +7,8 @@ package autotetris.ai.neurons;
 import autotetris.ai.Example;
 import autotetris.ai.ExampleBase;
 import autotetris.ai.FuncHub;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -30,26 +25,12 @@ public class CreateExampleBase {
                 List<Double> v = new LinkedList<Double>();
                 u.add((double) r1);
                 u.add((double) r2);
-                v.add((double) FuncHub.xor(r1, r2));
+                //v.add((double) FuncHub.xor(r1, r2));
+                v.add((double) FuncHub.and(r1, r2));
                 base.insert(new Example<Double, Double>(u, v), 1.0);
             }
         }
-        
-        writeBase(base);
-    }
-
-    public static void writeBase(ExampleBase base) {
-        String file = "data/XorExampleBase.ser";
-        FileOutputStream fos = null;
-        ObjectOutputStream oos = null;
-
-        try {
-            fos = new FileOutputStream(file);
-            oos = new ObjectOutputStream(fos);
-            oos.writeObject(base);
-            oos.close();
-        } catch (IOException ex) {
-            Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        base.save("data/AndExampleBase.ser");
+        //base.save("data/XorExampleBase.ser");
     }
 }

@@ -35,6 +35,78 @@ public class ExampleNode implements Serializable{
         probability = left.getProbability() + right.getProbability();
     }
 
+    //<editor-fold defaultstate="collapsed" desc="Getter/Setter">
+    /**
+     * @return the example
+     */
+    public Example getExample() {
+        return example;
+    }
+    
+    /**
+     * @param example the example to set
+     */
+    public void setExample(Example example) {
+        this.example = example;
+    }
+    
+    /**
+     * @return the left
+     */
+    public ExampleNode getLeft() {
+        return left;
+    }
+    
+    /**
+     * @return the right
+     */
+    public ExampleNode getRight() {
+        return right;
+    }
+    
+    /**
+     * @return the probability
+     */
+    public double getProbability() {
+        return probability;
+    }
+    
+    /**
+     * @param probability the probability to set
+     */
+    public void setProbability(double probability) {
+        this.probability = probability;
+    }
+    
+    /**
+     * @return the size
+     */
+    public int getSize() {
+        return size;
+    }
+    
+    /**
+     * @param left the left to set
+     */
+    public void setLeft(ExampleNode left) {
+        this.left = left;
+    }
+    
+    /**
+     * @param right the right to set
+     */
+    public void setRight(ExampleNode right) {
+        this.right = right;
+    }
+    
+    /**
+     * @param size the size to set
+     */
+    public void setSize(int size) {
+        this.size = size;
+    }
+    //</editor-fold>
+    
     // update the probablity (depth first) and sum up to the head
     public double updateProbability() {
         // if has left and right child container
@@ -122,75 +194,5 @@ public class ExampleNode implements Serializable{
     @Override
     public ExampleNode clone() {
         return new ExampleNode(getExample(), getProbability());
-    }
-
-    /**
-     * @return the example
-     */
-    public Example getExample() {
-        return example;
-    }
-
-    /**
-     * @param example the example to set
-     */
-    public void setExample(Example example) {
-        this.example = example;
-    }
-
-    /**
-     * @return the left
-     */
-    public ExampleNode getLeft() {
-        return left;
-    }
-
-    /**
-     * @return the right
-     */
-    public ExampleNode getRight() {
-        return right;
-    }
-
-    /**
-     * @return the probability
-     */
-    public double getProbability() {
-        return probability;
-    }
-
-    /**
-     * @param probability the probability to set
-     */
-    public void setProbability(double probability) {
-        this.probability = probability;
-    }
-
-    /**
-     * @return the size
-     */
-    public int getSize() {
-        return size;
-    }
-
-    /**
-     * @param left the left to set
-     */
-    public void setLeft(ExampleNode left) {
-        this.left = left;
-    }
-
-    /**
-     * @param right the right to set
-     */
-    public void setRight(ExampleNode right) {
-        this.right = right;
-    }
-
-    /**
-     * @param size the size to set
-     */
-    public void setSize(int size) {
-        this.size = size;
     }
 }

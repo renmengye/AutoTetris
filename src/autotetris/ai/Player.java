@@ -98,9 +98,9 @@ public class Player extends Thread {
             System.out.println(i);
         }
     }
-
-    public synchronized void update() {
-        update = true;
+    
+    public synchronized void setUpdate(boolean value){
+        update = value;
     }
 
     public void end_game() {
@@ -115,7 +115,7 @@ public class Player extends Thread {
                     board = host.getBoard();
                     piece = host.getPiece();
                     gen_target();
-                    update = false;
+                    this.setUpdate(false);
                 } else {
                     //if (!board.check_done(piece, GameMove.NULL)) {
                     Router router = new Router(board, piece, target);

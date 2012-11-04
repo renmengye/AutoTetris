@@ -3,243 +3,160 @@ package autotetris.ai.neurons;
 import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author rmy
  */
-public class Neuron implements Serializable{
+public class Neuron implements Serializable, Runnable {
 
-    // id number for different neurons
-    private int id; 
-    
-    // net linear sum from the source
-    private double netLinearSum;
-    
     // value send to next level target
-    private double value;
-    
+    protected double value;
     // bias value add to the linear sum
-    private double bias;
-    
+    protected double bias;
     // error calced by back_prop
-    private double error;
-    
+    protected double error;
     // learning rate
-    private double rate;
-    
-    // storing the source neurons and the linear weights
-    private HashMap<Neuron, Double> source;
-    
-    // stroing the list of target neurons
-    private LinkedList<Neuron> target;
-    
-    // Forward feed thread
-    private transient Thread feed;
-    
-    // Back propagate thread
-    private transient Thread back;
-
-    // Contruct a neuron with an id
-    public Neuron(int id) {
-        this.id = id;
-        bias = 0.0;                           //assume bias is 0 for this simple model
-        rate = 1.0;                           //assume rate is 1 for default
-        source = new HashMap<Neuron, Double>();
-        target = new LinkedList<Neuron>();
-    }
-
-    //add a target neuron to this neuron
-    public void addTarget(Neuron n) {
-        getTarget().add(n);
-    }
-
-    // add a source neuron to this neuron
-    public void addSource(Neuron n, double w) {
-        getSource().put(n, w);                   //randomly put weight as 1, need to change afterwards
-    }
-    
-    // returns the collection of the weights for the source neurons
-    public Collection<Double> getWeights(){
-        return getSource().values();
-    }
-
-    // pass the net sum to activation function, needs to be overrided
-    public double getActivatedValue(double a){
-        return 0.0;
-    }
-
-    // pass the net sum to the derivative of activation function
-    public double getActivatedValueDerivative(double a){
-        return 0.0;
-    }
-    
-    public void startFeed(){
-        setFeed(new Thread() {
-
-             @Override
-             public void run() {
-                 updateValue();
-             }
-         });
-        getFeed().start();
-    }
-
-    public void startBack(){
-        setBack(new Thread() {
-
-             @Override
-             public void run() {
-                 updateError();
-                 updateWeight();
-             }
-         });
-        getBack().start();
-    }
-    
-    public void updateValue() {
-        netLinearSum = 0.0;
-        for (Neuron n : getSource().keySet()) {      //doing a linear combination sum
-            netLinearSum += n.getValue() * getSource().get(n);
-        }
-        netLinearSum += getBias();
-        setValue(getActivatedValue(getNetLinearSum()));             //multiply the non-linear activation function
-    }
-    
-
-    public void updateError() {
-        double sum = 0;
-        for (Neuron n : getTarget()) {               //get a linear sum of the error before
-            sum += n.getError() * n.getSource().get(this);
-        }
-        setError(getRate() * getActivatedValueDerivative(getNetLinearSum()) * sum);       //times the derivative of activation function
-    }
-
-    public void updateWeight() {
-
-        for (Entry<Neuron, Double> e : getSource().entrySet()) {      //doing a linear combination sum
-            double w = e.getValue();
-            double y = e.getKey().getValue();
-            e.setValue(w + getError() * y);
-        }
-    }
+    protected double rate;
+    // manage connections to the sources
+    protected final NeuronConnector sourceConnector;
+    // manage connections to the targets
+    protected final NeuronConnector targetConnector;
+    // provide activation function
+    protected FunctionActivator activator;
+    // synchronization lock object
+    protected final Network network;
 
     /**
-     * @return the id
+     * Construct a neuron
      */
-    public int getId() {
-        return id;
+    public Neuron(Network network) {
+        this(0.0, 1.0, new GaussianActivator(), network);
+    }
+
+    public Neuron(double bias, double rate, FunctionActivator activator, Network network) {
+        this.bias = bias;
+        this.rate = rate;
+        this.activator = activator;
+        this.network = network;
+        this.sourceConnector = new NeuronConnector();
+        this.targetConnector = new NeuronConnector();
     }
 
     /**
-     * @return the netLinearSum
-     */
-    public double getNetLinearSum() {
-        return netLinearSum;
-    }
-
-    /**
-     * @return the value
+     * @return The stored value of the neuron
      */
     public double getValue() {
         return value;
     }
 
     /**
-     * @return the bias
+     * Add a target neuron to the neuron
+     *
+     * @param neuron The target neuron
      */
-    public double getBias() {
-        return bias;
+    public void addTarget(Neuron neuron) {
+        //getTarget().add(n);
+        this.targetConnector.addNeuron(neuron.sourceConnector, 1.0);
     }
 
     /**
-     * @return the error
+     * Add a source neuron to the neuron
+     *
+     * @param neuron The source neuron
+     * @param weight The weight of the source neuron
      */
-    public double getError() {
-        return error;
+    public void addSource(Neuron neuron, double weight) {
+        //randomly put weight as 1, need to change afterwards
+        //getSource().put(neuron, weight);
+        this.sourceConnector.addNeuron(neuron.targetConnector, weight);
     }
 
     /**
-     * @param error the error to set
+     * Clear all the target neurons
      */
-    public void setError(double error) {
-        this.error = error;
+    public void clearTargets() {
+        this.targetConnector.reset();
     }
 
     /**
-     * @return the rate
+     * Clear all the source neurons
      */
-    public double getRate() {
-        return rate;
+    public void clearSources() {
+        this.sourceConnector.reset();
     }
 
     /**
-     * @param rate the rate to set
+     * Update the value of neuron itself after all the source values are
+     * collected
      */
-    public void setRate(double rate) {
-        this.rate = rate;
+    protected void updateValue() {
+        //multiply the non-linear activation function
+        this.value =
+                this.activator.computeActivedValue(
+                this.sourceConnector.getNetLinearSum());
     }
 
     /**
-     * @return the source
+     * Update the error of neuron itself after all the error values are
+     * collected
      */
-    public HashMap<Neuron, Double> getSource() {
-        return source;
+    protected void updateError() {
+        // multiply the derivative of activation function
+        this.error =
+                (this.rate 
+                * this.activator.computeActivedValueDerivative(this.sourceConnector.getNetLinearSum())
+                * this.targetConnector.getNetLinearSum());
     }
 
     /**
-     * @param source the source to set
+     * Update the weight of a source neuron
      */
-    public void setSource(HashMap<Neuron, Double> source) {
-        this.source = source;
+    protected void updateWeight() throws NeuronNotConnectedException {
+        this.sourceConnector.updateWeight(this.error);
     }
 
-    /**
-     * @return the target
-     */
-    public List<Neuron> getTarget() {
-        return target;
-    }
+    public void run() {
+        synchronized (this.network) {
+            while (true) {
+                
+                // Collected all the sources, can send value to targets
+                if (this.sourceConnector.isReady()) {
 
-    /**
-     * @param target the target to set
-     */
-    public void setTarget(LinkedList<Neuron> target) {
-        this.target = target;
-    }
+                    this.updateValue();
 
-    /**
-     * @return the feed
-     */
-    public Thread getFeed() {
-        return feed;
-    }
+                    try {
+                        this.targetConnector.sendValue(value);
+                    } catch (NeuronNotConnectedException ex) {
+                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
-    /**
-     * @param feed the feed to set
-     */
-    public void setFeed(Thread feed) {
-        this.feed = feed;
-    }
-
-    /**
-     * @return the back
-     */
-    public Thread getBack() {
-        return back;
-    }
-
-    /**
-     * @param back the back to set
-     */
-    public void setBack(Thread back) {
-        this.back = back;
-    }
-
-    /**
-     * @param value the value to set
-     */
-    protected void setValue(double value) {
-        this.value = value;
+                    this.network.notifyAll();
+                    this.sourceConnector.resetCount();
+                }
+                
+                // Collected all the errors, can send error to sources
+                if (this.targetConnector.isReady()) {
+                    this.updateError();
+                    try {
+                        this.updateWeight();
+                        this.sourceConnector.sendValue(error);
+                    } catch (NeuronNotConnectedException ex) {
+                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    this.network.notifyAll();
+                    this.targetConnector.resetCount();
+                }
+                
+                try {
+                    this.network.wait();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
     }
 }

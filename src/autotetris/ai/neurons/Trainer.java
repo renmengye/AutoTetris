@@ -5,8 +5,8 @@ package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
 import autotetris.ai.ExampleBase;
-import autotetris.ai.ExampleNode;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,41 +23,46 @@ public class Trainer extends Thread {
     private double passingErrorSize;
 
     public Trainer(ExampleBase base, double error, int size) {
-        this.network = new Network(2, 1, 1);
+        this.network = new Network(2, 1, .5);
         this.base = base;
         this.network.addHiddenLayer(2);
+        //this.network.addHiddenLayer(10);
+        //this.network.addHiddenLayer(3);
         this.passingErrorRate = error;
         this.passingErrorSize = size;
     }
-    
+
     @Override
     public void run() {
         double errorOnce;
         double errorAverage = 0.0;
         int count;
-        
+
+        this.network.start();
+
         LinkedList<Double> errorList = new LinkedList<Double>();
 
         //train until the error average matches the precision and over the least number of cases
-        for (count = 0; errorAverage > getPassingErrorRate() | count < getPassingErrorSize(); count++) {
+        for (count = 0; errorAverage > this.passingErrorRate | count < this.passingErrorSize; count++) {
             try {
                 //get an example according to a randomized number
-                Example ex = getBase().getExample(new Random().nextDouble());
+                Example<Double, Double> ex = this.base.getExample(new Random().nextDouble());
 
+                List<Double> result = this.network.runOnce(ex, true);
                 //train the example and get the error
-                errorOnce = getNetwork().trainOnce(ex);
+                errorOnce = ex.getExpectedValues().get(0) - result.get(0);
 
                 //reset the probability of meeting the same example, has a learning factor of 5%
-                getBase().setExampleProbability(ex, getBase().getExampleProbability(ex) * .995 + errorOnce * 0.005);
+                //this.base.setExampleProbability(ex, this.base.getExampleProbability(ex) * .995 + errorOnce * 0.005);
 
                 //update database probability
-                getBase().updateProbability();                    //update the whole tree
-                System.out.printf("count: %d\terror: %.5f\n", count, errorOnce/1.0);
+                //this.base.updateProbability();                    //update the whole tree
+                System.out.printf("count: %d\tinput:%.1f %.1f\toutput:%.5f \terror: %.5f\n", count, ex.getInputValues().get(0), ex.getInputValues().get(1), result.get(0), errorOnce / 1.0);
 
                 //update the errorlist
-                if (errorList.size() >= getPassingErrorSize()) {
-                    errorAverage -= Math.abs(errorList.pop()) / (double) getPassingErrorSize();
-                    errorAverage += Math.abs(errorOnce) / (double) getPassingErrorSize() / 1.0;
+                if (errorList.size() >= this.passingErrorSize) {
+                    errorAverage -= Math.abs(errorList.pop()) / (double) this.passingErrorSize;
+                    errorAverage += Math.abs(errorOnce) / (double) this.passingErrorSize / 1.0;
                 } else {
                     errorAverage = errorAverage * errorList.size() / (errorList.size() + 1) + Math.abs(errorOnce / 1.0) / (errorList.size() + 1);
                 }
@@ -75,54 +80,5 @@ public class Trainer extends Thread {
      */
     public Network getNetwork() {
         return network;
-    }
-
-    /**
-     * @param network the network to set
-     */
-    public void setNetwork(Network network) {
-        this.network = network;
-    }
-
-    /**
-     * @return the base
-     */
-    public ExampleBase getBase() {
-        return base;
-    }
-
-    /**
-     * @param base the base to set
-     */
-    public void setBase(ExampleBase base) {
-        this.base = base;
-    }
-
-    /**
-     * @return the passingErrorRate
-     */
-    public double getPassingErrorRate() {
-        return passingErrorRate;
-    }
-
-    /**
-     * @param passingErrorRate the passingErrorRate to set
-     */
-    public void setPassingErrorRate(double passingErrorRate) {
-        this.passingErrorRate = passingErrorRate;
-    }
-
-    /**
-     * @return the passingErrorSize
-     */
-    public double getPassingErrorSize() {
-        return passingErrorSize;
-    }
-
-    /**
-     * @param passingErrorSize the passingErrorSize to set
-     */
-    public void setPassingErrorSize(double passingErrorSize) {
-        this.passingErrorSize = passingErrorSize;
     }
 }

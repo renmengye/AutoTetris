@@ -1,81 +1,119 @@
 package autotetris.ai.neurons;
 
 import autotetris.ai.Example;
-import autotetris.ai.FuncHub;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author rmy
  */
-public class Network implements Serializable{
+public class Network implements Serializable {
 
-    private LinkedList<Neuron> inlay;
-    private LinkedList<LinkedList<Neuron>> hidlay;
-    private LinkedList<Neuron> outlay;
+    private LinkedList<Neuron> inputLayer;
+    private LinkedList<LinkedList<Neuron>> hiddenLayers;
+    private LinkedList<Neuron> outputLayer;
+    private Neuron errorNeuron;
+    private Neuron resultNeuron;
+    private double learningRate;
 
-    //constructor with input size and output size
-    public Network(int inputSize, int outputSize, double lr) {
+    /**
+     * Construct a network
+     *
+     * @param inputSize Input layer size
+     * @param outputSize Output layer size
+     * @param learningRate Learning rate
+     */
+    public Network(int inputSize, int outputSize, double learningRate) {
 
-        inlay = new LinkedList<Neuron>();
-        hidlay = new LinkedList<LinkedList<Neuron>>();
-        outlay = new LinkedList<Neuron>();
+        this.inputLayer = new LinkedList<Neuron>();
+        this.hiddenLayers = new LinkedList<LinkedList<Neuron>>();
+        this.outputLayer = new LinkedList<Neuron>();
+        this.resultNeuron = new Neuron(this);
+        this.errorNeuron = new Neuron(this);
+        this.learningRate = learningRate;
 
         //initializing input neurons
         for (int j = 0; j < inputSize; j++) {
-            inlay.add(new InputNeuron(j));
+            InputNeuron neuron = new InputNeuron(0.0, learningRate, new GaussianActivator(), this);
+            this.connectNeurons(this.errorNeuron, neuron, new Random().nextDouble() * 0.5 + 0.5);
+            this.inputLayer.add(neuron);
         }
 
         //initializing output neurons
         for (int j = 0; j < outputSize; j++) {
-            OutputNeuron n = new OutputNeuron(j) {
-
-                @Override
-                public double getActivatedValue(double a) {
-                    return FuncHub.gauss(a);
-                    //return FuncHub.sigmoid(a);
-                }
-
-                @Override
-                public double getActivatedValueDerivative(double a) {
-                    return FuncHub.dgauss(a);
-                    //return FuncHub.dsigmoid(a);
-                }
-            };
-            n.setRate(lr);
-            outlay.add(n);
+            OutputNeuron neuron = new OutputNeuron(0.0, learningRate, new GaussianActivator(), this);
+            this.connectNeurons(neuron, this.resultNeuron, new Random().nextDouble() * 0.5 + 0.5);
+            this.outputLayer.add(neuron);
         }
 
         //default with no hidden layer
-        connect(inlay, outlay);
+        connectLayers(this.inputLayer, this.outputLayer);
     }
 
-    //connect two layers of neurons, s=source, t=target
-    private void connect(Collection<Neuron> s, Collection<Neuron> t) {
+    /**
+     * Connect two layers of neurons together, default weight 1.0
+     *
+     * @param sourceLayer The source layer
+     * @param targetLayer The target layer
+     */
+    private void connectLayers(Collection<Neuron> sourceLayer, Collection<Neuron> targetLayer) {
 
-        for (Neuron n : s) {
-            for (Neuron m : t) {
-                n.addTarget(m);
-                m.addSource(n, 1.0);
+        for (Neuron sourceNeuron : sourceLayer) {
+            for (Neuron targetNeuron : targetLayer) {
+                this.connectNeurons(sourceNeuron, targetNeuron, new Random().nextDouble() * 0.5 + 0.5);
             }
         }
     }
 
-    //disconnect two layers of neurons, s=source, t=target
-    private void disconnect(Collection<Neuron> s, Collection<Neuron> t) {
+    /**
+     * Connect two neurons together
+     *
+     * @param sourceNeuron The source neuron
+     * @param targetNeuron The target neuron
+     * @param sourceWeight The weight of the source neuron for the target neuron
+     */
+    private void connectNeurons(Neuron sourceNeuron, Neuron targetNeuron, double sourceWeight) {
+        sourceNeuron.addTarget(targetNeuron);
+        targetNeuron.addSource(sourceNeuron, sourceWeight);
+    }
 
-        for (Neuron m : t) {
-            m.getSource().clear();
+    /**
+     * Disconnect two layers of neurons
+     *
+     * @param sourceLayer
+     * @param targetLayer
+     */
+    private void disconnectLayers(Collection<Neuron> sourceLayer, Collection<Neuron> targetLayer) {
+
+        for (Neuron neuron : targetLayer) {
+            neuron.clearSources();
         }
 
-        for (Neuron n : s) {
-            n.getTarget().clear();
+        for (Neuron neuron : sourceLayer) {
+            neuron.clearTargets();
         }
 
     }
 
-    //add a hidden layer with n hidden nodes
+    /**
+     * Add one hidden layer to the network
+     *
+     * @param n The size of the hidden layer
+     */
     public void addHiddenLayer(int n) {    //add n neurons to a new layer
 
         //initialize a new linked list to store hidden neurons
@@ -83,144 +121,118 @@ public class Network implements Serializable{
 
         //initialize each neuron
         for (int j = 0; j < n; j++) {
-
-            //universal id as 1000, 1001, 2000....
-            Perceptron p = new Perceptron((hidlay.size() + 1) * 1000 + layer.size()) {
-
-                @Override
-                public double getActivatedValue(double a) {
-                    return FuncHub.gauss(a);
-                    //return FuncHub.sigmoid(a);
-                }
-
-                @Override
-                public double getActivatedValueDerivative(double a) {
-                    return FuncHub.dgauss(a);
-                    //return FuncHub.dsigmoid(a);
-                }
-            };
-            //p.set_rate(.8);
-            layer.add(p);
+            Neuron perceptron = new Neuron(0.0, this.learningRate, new SigmoidActivator(), this);
+            layer.add(perceptron);
         }
 
         //if this is the first hidden layer, then disconn in and out, conn hidden with in and out
-        if (hidlay.isEmpty()) {
-            disconnect(inlay, outlay);
-            connect(inlay, layer);
-            connect(layer, outlay);
+        if (this.hiddenLayers.isEmpty()) {
+            disconnectLayers(this.inputLayer, this.outputLayer);
+            connectLayers(this.inputLayer, layer);
+            connectLayers(layer, this.outputLayer);
         } //if not the first hidden layer, then disconn prev hidden and out, conn hidden with prev and out
         else {
-            disconnect(hidlay.peekLast(), outlay);
-            connect(hidlay.peekLast(), layer);
-            connect(layer, outlay);
+            disconnectLayers(this.hiddenLayers.peekLast(), this.outputLayer);
+            connectLayers(this.hiddenLayers.peekLast(), layer);
+            connectLayers(layer, this.outputLayer);
         }
-        hidlay.add(layer);
+        this.hiddenLayers.add(layer);
     }
 
-    public List<Double> runOnce(Example ex) throws InterruptedException {
-
-        //input the input neurons with list values
-        Iterator<Double> vi = ex.getInputValues().listIterator();
-        for (Neuron i : inlay) {
-            if (vi.hasNext()) {
-                ((InputNeuron) i).input(vi.next());
-            } else {
-                ((InputNeuron) i).input(0.0);
+    public void start() {
+        for (Neuron neuron : this.inputLayer) {
+            new Thread(neuron).start();
+        }
+        for (List<Neuron> hiddenLayer : this.hiddenLayers) {
+            for (Neuron neuron : hiddenLayer) {
+                new Thread(neuron).start();
             }
         }
-
-        //activating the hidden layers
-        for (List<Neuron> layer : hidlay) {
-
-            //start the calc value process simultaneously throughout layer i
-            for (Neuron n : layer) {
-                n.startFeed();
-            }
-
-            //wait every neuron in the layer to finish
-            for (Neuron n : layer) {
-                n.getFeed().join();
-            }
+        for (Neuron neuron : this.outputLayer) {
+            new Thread(neuron).start();
         }
-
-        //activating the output layer
-        for (Neuron n : outlay) {
-            n.startFeed();
-        }
-
-
-        //wait output layer to join back
-        for (Neuron n : outlay) {
-            n.getFeed().join();
-            //System.out.println("o-joined");
-        }
-
-
-        //store the output neurons value into a new list
-        List<Double> result = new LinkedList<Double>();
-        for (Neuron n : outlay) {
-            result.add(n.getValue());
-        }
-        return result;
-
     }
 
-    //train the network with one example return the error sum
-    public double trainOnce(Example ex) throws InterruptedException {
-        
-        //record the total error and return
-        double esum = 0.0;
-        
-        //run the network in feed mode
-        runOnce(ex);
-        
-        
-        //maybe need to fix this assumption later on, but for now it seems like all networks use double type
-        Iterator<Double> ci = ex.getExpectedValues().listIterator();
-
-        //output layer calculate error
-        for (Neuron n : outlay) {
-            if (ci.hasNext()) {
-                ((OutputNeuron) n).notify_error(ci.next());
-            } else {
-                ((OutputNeuron) n).notify_error(0.0);
+    /**
+     * Run the network once and return the network result
+     *
+     * @param example The train example to be send to the input layer
+     * @param train Whether this example will be used to train the network
+     * @return The result of the output layer
+     * @throws InterruptedException
+     */
+    public List<Double> runOnce(Example example, boolean train) throws InterruptedException {
+        // Input the input neurons with list values
+        Iterator<Double> inputIterator = example.getInputValues().listIterator();
+        for (Neuron i : this.inputLayer) {
+            try {
+                if (inputIterator.hasNext()) {
+                    ((InputNeuron) i).input(inputIterator.next());
+                } else {
+                    ((InputNeuron) i).input(0.0);
+                }
+            } catch (Exception ex) {
+                Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
-        //output layer update weights thread start
-        for (Neuron n : outlay) {
-            
-            //by the way collect the error
-            esum += n.getError();
-            
-            n.startBack();
-        }
+        synchronized (this) {
+            while (true) {
+                if (this.resultNeuron.sourceConnector.isReady()) {
+                    this.resultNeuron.sourceConnector.resetCount();
+                    // If want to train the network then force the output neuron to send the errors
+                    if (train) {
+                        Iterator<Double> resultIterator = example.getExpectedValues().listIterator();
+                        for (Neuron neuron : this.outputLayer) {
+                            try {
+                                ((OutputNeuron) neuron).setError(resultIterator.next());
+                            } catch (NeuronNotConnectedException ex) {
+                                Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+                    } else {
+                        return this.resultNeuron.sourceConnector.getValueList();
+                    }
+                }
 
-        //wait all threads join
-        for (Neuron n : outlay) {
-            n.getBack().join();
-        }
+                if (this.errorNeuron.targetConnector.isReady()) {
+                    this.errorNeuron.targetConnector.resetCount();
+                    return this.resultNeuron.sourceConnector.getValueList();
+                }
 
-        //hidden layer error back prop
-        //iterate in descending order (near output first
-        Iterator<LinkedList<Neuron>> li = hidlay.descendingIterator();
-        List<Neuron> layer;
-        while (li.hasNext()) {
-
-            layer = li.next();
-
-            //start the calc value process simultaneously throughout layer i
-            for (Neuron n : layer) {
-                n.startBack();
-            }
-
-            //wait every neuron in the layer to finish
-            for (Neuron n : layer) {
-                n.getBack().join();
+                this.wait();
             }
         }
-        
-        return esum;
+    }
 
+    public static Network read(String path) throws FileNotFoundException, IOException, ClassNotFoundException {
+        File networkFile = new File(path);
+        Network network = null;
+
+        if (networkFile.exists()) {
+
+            FileInputStream fis;
+            ObjectInputStream ois;
+
+            fis = new FileInputStream(networkFile);
+            ois = new ObjectInputStream(fis);
+            network = (Network) ois.readObject();
+        } else {
+            throw new FileNotFoundException();
+        }
+        return network;
+    }
+
+    public void save(String path) {
+        FileOutputStream fos;
+        ObjectOutputStream oos;
+        try {
+            fos = new FileOutputStream(path);
+            oos = new ObjectOutputStream(fos);
+            oos.writeObject(this);
+            oos.close();
+        } catch (IOException ex) {
+            Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

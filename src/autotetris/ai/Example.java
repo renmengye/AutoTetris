@@ -2,7 +2,6 @@ package autotetris.ai;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -27,6 +26,22 @@ public class Example<TI, TO> implements Serializable {
         this(Arrays.asList(inputs), null);
     }
 
+    // <editor-fold defaultstate="collapsed" desc="Getter/Setter">
+    /**
+     * @return the inputValue
+     */
+    public List<TI> getInputValues() {
+        return inputValues;
+    }
+
+    /**
+     * @return the expectedValue
+     */
+    public List<TO> getExpectedValues() {
+        return expectedValues;
+    }
+    // </editor-fold>
+    
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -42,19 +57,5 @@ public class Example<TI, TO> implements Serializable {
             builder.append("\n");
         }
         return builder.toString();
-    }
-
-    /**
-     * @return the inputValue
-     */
-    public List<TI> getInputValues() {
-        return inputValues;
-    }
-
-    /**
-     * @return the expectedValue
-     */
-    public List<TO> getExpectedValues() {
-        return expectedValues;
     }
 }

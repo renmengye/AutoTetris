@@ -92,7 +92,7 @@ public class GameHost extends Thread implements ATCommon {
                     piece = initPiece();
                     //tcanvas.setPiece(piece);
                     if (player != null) {
-                        player.update();
+                        player.setUpdate(true);
                     }
                     if (board.check_done(piece, GameMove.DOWN)) {
                         //tcanvas.setStatus(GameStatus.DEAD);
