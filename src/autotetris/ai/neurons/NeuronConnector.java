@@ -29,12 +29,10 @@ public class NeuronConnector implements Serializable {
     private HashMap<NeuronConnector, ConnectedState> map;
     private int receivedCount;
     private boolean ready;
-    //private Neuron host;
 
     public NeuronConnector() {
         this.map = new HashMap<NeuronConnector, ConnectedState>();
         this.receivedCount = 0;
-        //this.host=host;
     }
 
     public synchronized void addNeuron(NeuronConnector neuron, double weight) {
@@ -92,7 +90,10 @@ public class NeuronConnector implements Serializable {
             ConnectedState state = entry.getValue();
             state.weight = state.weight + error * state.value;
             NeuronConnector connector = entry.getKey();
-            connector.updateWeight(this, state.weight);
+
+            if (connector != this) {
+                connector.updateWeight(this, state.weight);
+            }
         }
     }
 

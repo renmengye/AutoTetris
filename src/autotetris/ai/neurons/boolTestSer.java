@@ -6,7 +6,6 @@ package autotetris.ai.neurons;
 import autotetris.ai.Example;
 import autotetris.ai.ExampleBase;
 import java.io.DataInputStream;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -21,7 +20,7 @@ public class boolTestSer {
     public static final String defaultNetworkPath = "data/AndNetwork.ser";
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, NeuronNotConnectedException {
 
         Network network;
         ExampleBase base;
@@ -72,7 +71,7 @@ public class boolTestSer {
 
             //validate input
             if ((r1 == 1 || r1 == 0) && (r2 == 1 || r2 == 0)) {
-                network.setTraining(false);
+                network.setTrainingMode(false);
                 List<Double> result = network.runOnce(new Example<Double, Double>((double) r1, (double) r2));
                 //return result
                 System.out.printf("The neural network output: %.2f\n", result.get(0));

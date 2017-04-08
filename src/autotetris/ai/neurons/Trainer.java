@@ -48,7 +48,7 @@ public class Trainer extends Thread {
                 //get an example according to a randomized number
                 Example<Double, Double> ex = this.base.getExample(new Random().nextDouble());
 
-                network.setTraining(true);
+                network.setTrainingMode(true);
                 List<Double> result = this.network.runOnce(ex);
                 //train the example and get the error
                 errorOnce = ex.getExpectedValues().get(0) - result.get(0);
@@ -58,7 +58,7 @@ public class Trainer extends Thread {
 
                 //update database probability
                 this.base.updateProbability();                    //update the whole tree
-                System.out.printf("count: %d\tinput:%.1f %.1f\toutput:%.5f \terror: %.5f\n", count, ex.getInputValues().get(0), ex.getInputValues().get(1), result.get(0), errorOnce / 1.0);
+                //System.out.printf("count: %d\tinput:%.1f %.1f\toutput:%.5f \terror: %.5f\n", count, ex.getInputValues().get(0), ex.getInputValues().get(1), result.get(0), errorOnce / 1.0);
 
                 //update the errorlist
                 if (errorList.size() >= this.passingErrorSize) {
@@ -69,11 +69,12 @@ public class Trainer extends Thread {
                 }
 
                 errorList.addLast(errorOnce / 1.0);
+            } catch (NeuronNotConnectedException ex1) {
+                Logger.getLogger(Trainer.class.getName()).log(Level.SEVERE, null, ex1);
             } catch (InterruptedException ex1) {
                 Logger.getLogger(Trainer.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
-        System.out.println("Training network completed.\n");
     }
 
     /**

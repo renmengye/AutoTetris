@@ -1,8 +1,6 @@
 package autotetris.ai.neurons;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -139,8 +137,6 @@ public class Neuron implements Serializable, Runnable {
                         } catch (NeuronNotConnectedException ex) {
                             Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
                         }
-
-                        //this.network.notifyAll();
                         this.sourceConnector.resetCount();
                         break;
                     }
@@ -157,28 +153,23 @@ public class Neuron implements Serializable, Runnable {
 
             if (this.waitForTarget) {
                 // Wait the target the send error back
-                while (true) {
-
-                    // Collected all the errors, can send error to sources
-                    if (this.targetConnector.isReady()) {
-                        this.updateError();
-                        try {
-                            this.updateWeight();
-                            this.sourceConnector.sendValue(error);
-                        } catch (NeuronNotConnectedException ex) {
-                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                        this.targetConnector.resetCount();
-                        break;
+                synchronized (this.targetConnector) {
+                    try {
+                        this.targetConnector.wait(500);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                    synchronized (this.targetConnector) {
-                        try {
-                            this.targetConnector.wait();
-                        } catch (InterruptedException ex) {
-                            Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                }
+                // Collected all the errors, can send error to sources
+                if (this.targetConnector.isReady()) {
+                    this.updateError();
+                    try {
+                        this.updateWeight();
+                        this.sourceConnector.sendValue(error);
+                    } catch (NeuronNotConnectedException ex) {
+                        Logger.getLogger(Neuron.class.getName()).log(Level.SEVERE, null, ex);
                     }
+                    this.targetConnector.resetCount();
                 }
             }
         }

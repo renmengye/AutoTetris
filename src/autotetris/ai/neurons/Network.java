@@ -148,39 +148,43 @@ public class Network implements Serializable {
         this.hiddenLayers.add(layer);
     }
 
+    /**
+     * Start each neurons in the network as new threads
+     */
     public void start() {
 
-        int input = 1;
+        int input = 0;
         for (Neuron neuron : this.inputLayer) {
             neuron.waitForSource = false;
             neuron.waitForTarget = true;
-            new Thread(neuron, "Input " + input).start();
-            input++;
+            new Thread(neuron, "Input " + ++input).start();
         }
 
 
         int layer = 1;
         for (List<Neuron> hiddenLayer : this.hiddenLayers) {
-            int i = 1;
+            int i = 0;
             for (Neuron neuron : hiddenLayer) {
                 neuron.waitForSource = true;
                 neuron.waitForTarget = this.isTraining;
-                new Thread(neuron, "Hidden " + layer + "-" + i).start();
-                i++;
+                new Thread(neuron, "Hidden " + layer + "-" + ++i).start();
             }
             layer++;
         }
 
-        int output = 1;
+        int output = 0;
         for (Neuron neuron : this.outputLayer) {
             neuron.waitForSource = true;
             neuron.waitForTarget = false;
-            new Thread(neuron, "Output " + output).start();
-            output++;
+            new Thread(neuron, "Output " + ++output).start();
         }
     }
 
-    public void setTraining(boolean isTraining) {
+    /**
+     * Set the training mode of the network
+     * @param isTraining Whether to turn on training mode
+     */
+    public void setTrainingMode(boolean isTraining) {
         this.isTraining = isTraining;
         for (List<Neuron> hiddenLayer : this.hiddenLayers) {
             for (Neuron neuron : hiddenLayer) {
@@ -198,67 +202,59 @@ public class Network implements Serializable {
      * @return The result of the output layer
      * @throws InterruptedException
      */
-    public List<Double> runOnce(Example example) throws InterruptedException {
-
-        // Notify all neurons that another run has started
-        //synchronized (this) {
-        //    this.notifyAll();
-        //}
+    public List<Double> runOnce(Example example) throws InterruptedException, NeuronNotConnectedException {
 
         // Input the input neurons with list values
         Iterator<Double> inputIterator = example.getInputValues().listIterator();
         for (Neuron i : this.inputLayer) {
-            try {
-                if (inputIterator.hasNext()) {
-                    ((InputNeuron) i).input(inputIterator.next());
-                } else {
-                    ((InputNeuron) i).input(0.0);
-                }
-            } catch (Exception ex) {
-                Logger.getLogger(boolTestSer.class.getName()).log(Level.SEVERE, null, ex);
+            if (inputIterator.hasNext()) {
+                ((InputNeuron) i).input(inputIterator.next());
+            } else {
+                ((InputNeuron) i).input(0.0);
             }
         }
 
-        while (true) {
+        // Wait the output neuron result
+        // Only network is waiting for the result neuron
+        // Not putting while loop to avoid dead lock
+        // Maximum timout is 1 second
+        synchronized (this.resultNeuron.sourceConnector) {
+            this.resultNeuron.sourceConnector.wait(1000);
+            if (this.resultNeuron.sourceConnector.isReady()) {
+                this.resultNeuron.sourceConnector.resetCount();
+            }
+        }
 
-            // Wait the output neuron result
-            synchronized (this.resultNeuron.sourceConnector) {
-                while (true) {
-                    if (this.resultNeuron.sourceConnector.isReady()) {
-                        this.resultNeuron.sourceConnector.resetCount();
-                        break;
-                    } else {
-                        this.resultNeuron.sourceConnector.wait();
-                    }
-                }
+        // Send the error to the output neuron if the network is in training mode
+        if (this.isTraining) {
+            Iterator<Double> resultIterator = example.getExpectedValues().listIterator();
+            for (Neuron neuron : this.outputLayer) {
+                ((OutputNeuron) neuron).setError(resultIterator.next());
             }
 
             // Wait the input neuron error
-            // If want to train the network then force the output neuron to send the errors
-            if (this.isTraining) {
-                Iterator<Double> resultIterator = example.getExpectedValues().listIterator();
-                for (Neuron neuron : this.outputLayer) {
-                    try {
-                        ((OutputNeuron) neuron).setError(resultIterator.next());
-                    } catch (NeuronNotConnectedException ex) {
-                        Logger.getLogger(Network.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-                synchronized (this.errorNeuron.targetConnector) {
-                    while (true) {
-                        if (this.errorNeuron.targetConnector.isReady()) {
-                            this.errorNeuron.targetConnector.resetCount();
-                            break;
-                        } else {
-                            this.errorNeuron.targetConnector.wait();
-                        }
-                    }
+            // Only network is waiting for the error neuron
+            // Not putting while loop to avoid dead lock
+            // Maximum timout is 1 second
+            synchronized (this.errorNeuron.targetConnector) {
+                this.errorNeuron.targetConnector.wait(1000);
+                if (this.errorNeuron.targetConnector.isReady()) {
+                    this.errorNeuron.targetConnector.resetCount();
                 }
             }
-            return this.resultNeuron.sourceConnector.getValueList();
         }
+        
+        return this.resultNeuron.sourceConnector.getValueList();
     }
 
+    /**
+     * Read a Network from a path
+     * @param path Path where the Network is saved
+     * @return The de-serialized Network
+     * @throws FileNotFoundException
+     * @throws IOException
+     * @throws ClassNotFoundException 
+     */
     public static Network read(String path) throws FileNotFoundException, IOException, ClassNotFoundException {
         File networkFile = new File(path);
         Network network = null;
@@ -277,6 +273,10 @@ public class Network implements Serializable {
         return network;
     }
 
+    /**
+     * Save a Network to a path
+     * @param path  Path where the Network is going to be saved
+     */
     public void save(String path) {
         FileOutputStream fos;
         ObjectOutputStream oos;
@@ -285,10 +285,6 @@ public class Network implements Serializable {
             oos = new ObjectOutputStream(fos);
             oos.writeObject(this);
             oos.close();
-
-
-
-
         } catch (IOException ex) {
             Logger.getLogger(boolTestSer.class
                     .getName()).log(Level.SEVERE, null, ex);

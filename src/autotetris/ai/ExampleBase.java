@@ -113,8 +113,8 @@ public class ExampleBase implements Serializable {
     }
 
     public void save(String path) {
-        FileOutputStream fos = null;
-        ObjectOutputStream oos = null;
+        FileOutputStream fos;
+        ObjectOutputStream oos;
 
         try {
             fos = new FileOutputStream(path);
